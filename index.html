@@ -45,7 +45,11 @@
     .card{background:var(--card);border:1px solid var(--ring);border-radius:var(--radius);padding:14px}
     .title{display:flex;align-items:center;gap:10px}
     .title h3{margin:0;font-size:17px;font-weight:800}
-    .translation{margin:6px 0 6px;color:var(--muted)}
+    .trWrap{margin:6px 0 8px;padding:0;border:1px solid var(--ring);border-radius:12px;background:var(--card)}
+    .trTitle{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--ring);cursor:pointer}
+    .trTitle::-webkit-details-marker{display:none}
+    .trTitle .action{color:var(--brand);font-weight:800}
+    .translation{margin:0;padding:12px 14px;color:var(--text);font-size:clamp(15px,4.7vw,18px);line-height:1.45;letter-spacing:.1px}
     .recite{margin:8px 0;padding:12px 14px;border:1px solid var(--ring);border-radius:12px;background:var(--chip);font-weight:800;font-size:clamp(18px,5.6vw,24px);line-height:1.35;letter-spacing:.2px;text-align:center;color:var(--text)}
     .meta{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
     .tag{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
@@ -94,12 +98,12 @@
 
 <script>
 var INVOCATIONS=[
-  {id:'tasbih-post-salah',title:'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Après la prière'],wudu:'Non obligatoire mais recommandé',source:'Sahih Muslim 597',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]},
-  {id:'subhan-wa-bi-hamdih',title:'Subḥân Allâh wa bi-ḥamdih',transcription:'Subḥân Allâh wa bi-ḥamdih',translation:'Gloire à Allah et louange à Lui',moment:['Matin','Soir','Toute la journée'],wudu:'Non',source:'Sahih Muslim 2691',goal:100},
-  {id:'tahlil-100',title:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…',transcription:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr',translation:'Nul n’est digne d’être adoré en dehors d’Allah…',moment:['Matin','Soir'],wudu:'Non',source:'Sahih al-Bukhari 3293',goal:100},
-  {id:'istighfar',title:'Astaghfirullâh',transcription:'Astaghfirullâh',translation:'Je demande pardon à Allah',moment:['Toute la journée'],wudu:'Non',source:'Sahih Muslim 2702',goal:100},
-  {id:'salat-ala-nabi',title:'Allâhumma ṣalli ʿalâ Muḥammad…',transcription:'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad',translation:'Ô Allah, prie sur Muhammad et sur sa famille',moment:['Toute la journée','Vendredi (recommandé)'],wudu:'Non',source:'Sahih al-Bukhari 6357',goal:null},
-  {id:'tasbih-sommeil',title:'Tasbîḥ Fâṭima (avant de dormir)',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Avant de dormir'],wudu:'Non',source:'Sahih al-Bukhari 6318',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]}
+  {id:'tasbih-post-salah',title:'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Après la prière'],wudu:'Non obligatoire mais recommandé',source:'Sahih Muslim 597a',sourceUrl:'https://sunnah.com/muslim:597a',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]},
+  {id:'subhan-wa-bi-hamdih',title:'Subḥân Allâh wa bi-ḥamdih',transcription:'Subḥân Allâh wa bi-ḥamdih',translation:'Gloire à Allah et louange à Lui',moment:['Matin','Soir','Toute la journée'],wudu:'Non',source:'Sahih Muslim 2691',sourceUrl:'https://sunnah.com/muslim:2691',goal:100},
+  {id:'tahlil-100',title:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…',transcription:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr',translation:'Nul n’est digne d’être adoré en dehors d’Allah…',moment:['Matin','Soir'],wudu:'Non',source:'Sahih al-Bukhari 3293',sourceUrl:'https://sunnah.com/bukhari:3293',goal:100},
+  {id:'istighfar',title:'Astaghfirullâh',transcription:'Astaghfirullâh',translation:'Je demande pardon à Allah',moment:['Toute la journée'],wudu:'Non',source:'Sahih Muslim 2702',sourceUrl:'https://sunnah.com/muslim:2702b',goal:100},
+  {id:'salat-ala-nabi',title:'Allâhumma ṣalli ʿalâ Muḥammad…',transcription:'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad',translation:'Ô Allah, prie sur Muhammad et sur sa famille',moment:['Toute la journée','Vendredi (recommandé)'],wudu:'Non',source:'Sahih al-Bukhari 6357',sourceUrl:'https://sunnah.com/bukhari:6357',goal:null},
+  {id:'tasbih-sommeil',title:'Tasbîḥ Fâṭima (avant de dormir)',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Avant de dormir'],wudu:'Non',source:'Sahih al-Bukhari 6318',sourceUrl:'https://sunnah.com/bukhari:6318',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]}
 ];
 var FILTERS=['Tout','Après la prière','Matin','Soir','Toute la journée','Avant de dormir'];
 
@@ -146,15 +150,14 @@ function updateOverall(){var withGoals=INVOCATIONS.filter(function(v){return v.t
 function renderCards(){var wrap=$('#cards');wrap.innerHTML='';INVOCATIONS.filter(inFilter).forEach(function(inv){var card=document.createElement('article');card.className='card shadow';
   var head=document.createElement('div');head.className='title';var h3=document.createElement('h3');h3.textContent=inv.title;head.appendChild(h3);var abtn=document.createElement('button');abtn.className='audioBtn';abtn.textContent='🔊';abtn.title='Écouter un exemple court';abtn.onclick=function(){playAudio(inv.id,abtn)};head.appendChild(abtn);card.appendChild(head);
   var rec=document.createElement('div');rec.className='recite';rec.textContent=inv.transcription;card.appendChild(rec);
-  var tr=document.createElement('div');tr.className='translation';tr.textContent=inv.translation;card.appendChild(tr);
-  var meta=document.createElement('div');meta.className='meta';(inv.moment||[]).forEach(function(m){var t=document.createElement('span');t.className='tag';t.textContent=m;meta.appendChild(t);});var w=document.createElement('span');w.className='tag';w.textContent='Ablutions: '+inv.wudu;meta.appendChild(w);var s=document.createElement('span');s.className='tag';s.textContent='Source: '+inv.source;meta.appendChild(s);card.appendChild(meta);
+  var trWrap=document.createElement('details');trWrap.className='trWrap';var trTitle=document.createElement('summary');trTitle.className='trTitle';var tLabel=document.createElement('span');tLabel.textContent='Traduction (FR)';var tAction=document.createElement('span');tAction.className='action';tAction.textContent='Afficher';trTitle.appendChild(tLabel);trTitle.appendChild(tAction);trWrap.appendChild(trTitle);var tr=document.createElement('div');tr.className='translation';tr.textContent=inv.translation;trWrap.appendChild(tr);trWrap.open=false;trWrap.addEventListener('toggle',function(){tAction.textContent=trWrap.open?'Masquer':'Afficher';});card.appendChild(trWrap);
+  var meta=document.createElement('div');meta.className='meta';(inv.moment||[]).forEach(function(m){var t=document.createElement('span');t.className='tag';t.textContent=m;meta.appendChild(t);});var w=document.createElement('span');w.className='tag';w.textContent='Ablutions: '+inv.wudu;meta.appendChild(w);var s;if(inv.sourceUrl){s=document.createElement('a');s.className='tag';s.href=inv.sourceUrl;s.target='_blank';s.rel='noopener';s.textContent='Source: '+inv.source;}else{s=document.createElement('span');s.className='tag';s.textContent='Source: '+inv.source;}meta.appendChild(s);card.appendChild(meta);
   if(inv.type==='triple'){
     var subgrid=document.createElement('div');subgrid.className='subgrid';inv.parts.forEach(function(p){var sub=document.createElement('div');sub.className='sub';var h4=document.createElement('h4');h4.textContent=p.label+' • '+p.goal;sub.appendChild(h4);var g=document.createElement('div');g.className='goal';var prog=document.createElement('div');prog.className='progress';var fill=document.createElement('div');prog.appendChild(fill);var cnt=document.createElement('div');cnt.className='count';g.appendChild(prog);g.appendChild(cnt);sub.appendChild(g);var controls=document.createElement('div');controls.className='controls';var plus=document.createElement('button');plus.className='primary';plus.textContent='+1';var reset=document.createElement('button');reset.className='ghost';reset.textContent='↺';controls.appendChild(plus);controls.appendChild(reset);sub.appendChild(controls);subgrid.appendChild(sub);function sync(){var v=(state.counts[inv.id].sub[p.key]||0);var pc=Math.min(100,(v/p.goal)*100);fill.style.width=pct(pc)+'%';cnt.textContent=v+' / '+p.goal;}function clamp(v){return Math.max(0,Math.min(p.goal,v));}plus.onclick=function(){state.counts[inv.id].sub[p.key]=clamp((state.counts[inv.id].sub[p.key]||0)+1);saveState();sync();syncTotal();};reset.onclick=function(){state.counts[inv.id].sub[p.key]=0;saveState();sync();syncTotal();};sync();});
     var total=document.createElement('div');total.className='goal';var tp=document.createElement('div');tp.className='progress';var tf=document.createElement('div');tp.appendChild(tf);var tc=document.createElement('div');tc.className='count';total.appendChild(tp);total.appendChild(tc);function syncTotal(){var pr=cardProgress(inv);tf.style.width=pct(pr.pct)+'%';tc.textContent=pr.current+' / '+pr.goal;updateOverall();}card.appendChild(subgrid);card.appendChild(total);setTimeout(syncTotal,0);
   } else {
     var g=document.createElement('div');g.className='goal';var prog=document.createElement('div');prog.className='progress';var fill=document.createElement('div');prog.appendChild(fill);var cnt=document.createElement('div');cnt.className='count';g.appendChild(prog);g.appendChild(cnt);card.appendChild(g);var controls=document.createElement('div');controls.className='controls';var plus=document.createElement('button');plus.className='primary';plus.textContent='+1';var reset=document.createElement('button');reset.className='ghost';reset.textContent='↺';controls.appendChild(plus);controls.appendChild(reset);card.appendChild(controls);function sync(){var v=(state.counts[inv.id]||0);if(typeof inv.goal==='number'&&inv.goal>0){var pc=Math.min(100,(v/inv.goal)*100);fill.style.width=pct(pc)+'%';cnt.textContent=v+' / '+inv.goal;}else{fill.style.width='0%';cnt.textContent=String(v);} }function clamp(v){if(typeof inv.goal==='number'&&inv.goal>0){return Math.max(0,Math.min(inv.goal,v));}return Math.max(0,v);}plus.onclick=function(){state.counts[inv.id]=clamp((state.counts[inv.id]||0)+1);saveState();sync();updateOverall();};reset.onclick=function(){state.counts[inv.id]=0;saveState();sync();updateOverall();};sync();
   }
-  
   wrap.appendChild(card);
 });}
 
@@ -162,20 +165,31 @@ function performResetGlobal(){try{localStorage.removeItem(STORAGE_KEY);}catch(e)
 
 document.getElementById('resetGlobal').onclick=function(){if(!confirm("Purger TOUTES les données et remettre l'application à zéro ?")) return;performResetGlobal();};
 
-function setupPWA(){function icon(size){var c=document.createElement('canvas');c.width=size;c.height=size;var x=c.getContext('2d');var g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,'#1d4ed8');g.addColorStop(1,'#0ea5e9');x.fillStyle=g;x.fillRect(0,0,size,size);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(0,0,size,size);x.fillStyle='#fff';x.beginPath();x.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='destination-out';x.beginPath();x.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='source-over';return c.toDataURL('image/png');}
+async function setupPWA(){
+  function icon(size){var c=document.createElement('canvas');c.width=size;c.height=size;var x=c.getContext('2d');var g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,'#1d4ed8');g.addColorStop(1,'#0ea5e9');x.fillStyle=g;x.fillRect(0,0,size,size);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(0,0,size,size);x.fillStyle='#fff';x.beginPath();x.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='destination-out';x.beginPath();x.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='source-over';return c.toDataURL('image/png');}
   var a=document.createElement('link');a.rel='apple-touch-icon';a.sizes='180x180';a.href=icon(180);document.head.appendChild(a);
   var m={name:'Adhkâr — Compteur',short_name:'Adhkâr',start_url:'./',display:'standalone',background_color:'#ffffff',theme_color:'#ffffff',icons:[{src:icon(192),sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:icon(512),sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
   var mb=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
-  if('serviceWorker' in navigator){try{var sw=new Blob([
-    "self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open('adhkar-cache-v1');await c.addAll(['./']);self.skipWaiting();})())});",
-    "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});",
-    "self.addEventListener('fetch',e=>{e.respondWith((async()=>{const c=await caches.open('adhkar-cache-v1');const r=await c.match(e.request);if(r) return r;try{const f=await fetch(e.request);if(e.request.method==='GET'&&f&&f.status===200&&f.type==='basic'){c.put(e.request,f.clone())}return f;}catch(err){return r||Response.error();}})())});"
-  ],{type:'text/javascript'});navigator.serviceWorker.register(URL.createObjectURL(sw));}catch(e){}}
+  if('serviceWorker' in navigator && window.isSecureContext){
+    try{
+      var swUrl='./sw.js';
+      var res=await fetch(swUrl,{method:'GET',cache:'no-store'});
+      if(res.ok){ await navigator.serviceWorker.register(swUrl); }
+    }catch(e){}
+  }
 }
 
 function msUntilNextMidnight(){var n=new Date();var t=new Date(n);t.setHours(24,0,0,0);return Math.max(0,t-n);} var __midnightTimer=null;function scheduleAutoReset(){if(__midnightTimer) clearTimeout(__midnightTimer);var d=msUntilNextMidnight()+1000;__midnightTimer=setTimeout(function(){if(state.date!==todayKey()){state=defaultState();saveState();renderCards();updateOverall();setSubtitle();}scheduleAutoReset();},d);} 
 
+function runSelfTests(){
+  function a(n,c){if(!c) throw new Error('Test: '+n);}
+  a('todayKey format',/^\d{4}-\d{2}-\d{2}$/.test(todayKey()));
+  var st=defaultState(); a('state has all counts',Object.keys(st.counts).length===INVOCATIONS.length);
+  a('pct clamps 120->100',pct(120)===100); a('pct clamps -5->0',pct(-5)===0); a('pct rounds',pct(49.6)===50);
+}
+
 setSubtitle(); renderFilters(); renderCards(); updateOverall(); setupPWA(); scheduleAutoReset();
+if(location.search.indexOf('test=1')>-1){ try{ runSelfTests(); console.log('Self-tests: OK'); }catch(e){ console.error(e); } }
 </script>
 </body>
 </html>
