@@ -2,113 +2,71 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <!-- iPhone & iPad friendly viewport + notch safe area -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0b132a">
-  <title>Adhkâr — Mobile & Tablet (PWA)</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#ffffff">
+  <title>Adhkâr — iPhone (PWA)</title>
   <style>
     :root{
-      --bg:#0b132a; /* dark indigo */
-      --bg-soft:#0f1a3a;
-      --panel:#0d1634;
-      --muted:#94a3b8; /* slate-400 */
-      --text:#f8fbff;
-      --brand:#22c55e; /* green-500 */
-      --brand-2:#3b82f6; /* blue-500 */
-      --warn:#f59e0b;
-      --ring:#334155;
-      --chip:#111a33;
-      --card:#0b142e;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
-      --space: 14px;
-      --tap: 16px; /* extra hit slop */
+      --bg:#f7f8fb; --panel:#ffffff; --card:#ffffff; --ring:#e5e7eb; --text:#111827; --muted:#6b7280; --brand:#2563eb; --brand2:#3b82f6; --warn:#b45309;
+      --radius:16px; --space:16px; --tap:52px; --chip:#f2f4f8; --barbg:#eef2f7;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b1220; --panel:#0f172a; --card:#0f172a; --ring:#1f2937; --text:#f1f5f9; --muted:#94a3b8; --chip:#141b2b; --barbg:#0b1220; --brand:#3b82f6; --brand2:#60a5fa; }
+      .shadow{box-shadow:0 10px 26px rgba(0,0,0,.35)}
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;
-      background:radial-gradient(1200px 800px at 20% -10%,#162545 0%,var(--bg) 60%);
-      color:var(--text);
-      font:17px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
-      padding-top:calc(env(safe-area-inset-top));
-      padding-left:calc(env(safe-area-inset-left));
-      padding-right:calc(env(safe-area-inset-right));
-      padding-bottom:calc(env(safe-area-inset-bottom));
-      -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
-    }
-    header{
-      position:sticky;top:0;z-index:30;
-      backdrop-filter:saturate(120%) blur(10px);
-      background:linear-gradient(180deg, #0b1024 0%, #0b1024cc 60%, transparent 100%);
-      border-bottom:1px solid var(--ring);
-    }
-    .container{max-width:1100px;margin:0 auto;padding:var(--space)}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    h1{font-size:clamp(20px,4.5vw,28px);margin:6px 0 2px}
-    .subtitle{color:var(--muted);font-size:13px}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial; padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);-webkit-tap-highlight-color:transparent}
 
-    /* Top actions */
-    .right{margin-left:auto; display:flex; gap:10px; align-items:center}
-    .btn{appearance:none;border:1px solid var(--ring);background:#0b1228;color:#f8fafc;padding:12px 14px;border-radius:14px;cursor:pointer;touch-action:manipulation}
-    .btn.warn{background:linear-gradient(180deg,#b45309,#92400e);border-color:#b45309}
-    .btn:active{transform:scale(.98)}
+    header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--ring)}
+    .container{max-width:900px;margin:0 auto;padding:var(--space)}
+    .row{display:flex;gap:12px;align-items:center}
+    h1{margin:0;font-size:20px;font-weight:800}
+    .subtitle{font-size:13px;color:var(--muted)}
+    .right{margin-left:auto}
+    .btn{appearance:none;border:1px solid var(--ring);background:var(--panel);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;min-height:44px}
+    .btn.warn{border-color:#f59e0b;background:#fef3c7;color:#92400e}
 
-    /* Progress header */
-    .overall{display:flex;align-items:center;gap:10px;margin-top:8px}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--ring)}
-    .overall .bar{flex:1;height:14px;border:1px solid var(--ring);border-radius:999px;overflow:hidden;background:#0b1228}
-    .overall .bar>div{height:100%;background:linear-gradient(90deg,var(--brand),#10b981);width:0}
-    #overallPct{min-width:56px;text-align:center}
-
-    /* Cards grid */
-    main{padding-bottom:84px; /* space for bottom bar */}
-    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
-    @media (min-width:700px){ .grid{grid-template-columns:repeat(2,minmax(320px,1fr));} }
-    @media (min-width:1024px){ .grid{grid-template-columns:repeat(3,minmax(320px,1fr));} }
-
-    .card{background:linear-gradient(180deg,var(--card),#0a1024);border:1px solid var(--ring);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);position:relative}
-    .title{font-weight:800;font-size:18px}
-    .trans{color:var(--muted);font-size:14px;margin-top:2px}
-    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-    .meta .tag{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
-
-    .goal{display:flex;align-items:center;gap:12px;margin-top:10px}
-    .progress{height:14px;background:#111827;border:1px solid var(--ring);border-radius:999px;overflow:hidden;flex:1}
-    .progress>div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));width:0}
-    .count{font-weight:800;min-width:110px;text-align:right}
-
-    /* Big tap area: tap card to +1 */
-    .tapzone{position:absolute;inset:0;border-radius:inherit}
-    .tapzone:active{outline:2px solid rgba(255,255,255,.05)}
-
-    /* Controls row */
-    .controls{display:flex;gap:8px;margin-top:10px}
-    .cbtn{appearance:none;border:1px solid var(--ring);background:#0b1228;color:#f8fafc;padding:12px 14px;border-radius:12px;cursor:pointer;touch-action:manipulation}
-    .cbtn.primary{background:linear-gradient(180deg,#1d4ed8,#1e40af);border-color:#1d4ed8}
-    .cbtn:active{transform:scale(.98)}
-
-    /* Triple (Fatima) sub-counters */
-    .subgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
-    .sub{border:1px dashed var(--ring);border-radius:14px;padding:12px;background:linear-gradient(180deg,#0d1733,#0b132a)}
-    .sub h4{margin:0 0 6px 0;font-size:15px}
-
-    /* Footer note */
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted);font-size:14px;gap:10px;flex-wrap:wrap}
-    .kbd{border:1px solid var(--ring);padding:2px 6px;border-radius:6px;background:#0b1228;color:var(--muted);font-size:12px}
-
-    /* Bottom filter bar: thumb-friendly, sticky */
-    .bottombar{position:sticky;bottom:0;z-index:40;background:linear-gradient(180deg, rgba(11,16,36,.4), rgba(11,16,36,.85));backdrop-filter:blur(10px);border-top:1px solid var(--ring);padding:10px calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
-    .filterstrip{display:flex;gap:8px;overflow:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
-    .chip{scroll-snap-align:start; padding:12px 14px;border-radius:999px;background:var(--chip);border:1px solid var(--ring);cursor:pointer;user-select:none;white-space:nowrap}
+    .filters{display:flex;gap:8px;overflow:auto;padding:10px 0 4px}
+    .chip{padding:10px 14px;border:1px solid var(--ring);background:var(--chip);color:var(--text);border-radius:999px;white-space:nowrap;cursor:pointer;font-weight:600}
     .chip.active{outline:2px solid var(--brand)}
 
-    /* Install banner (iOS instructions) */
-    .install-banner{position:sticky;bottom:72px;z-index:45;display:none}
-    .install-card{margin:12px auto;max-width:1100px;padding:10px 12px;border:1px dashed var(--ring);border-radius:14px;background:rgba(17,24,39,.85);backdrop-filter:blur(8px);display:flex;gap:10px;align-items:center}
-    .install-card .close{margin-left:auto}
+    .overall{display:flex;align-items:center;gap:10px;margin-top:12px}
+    .pill{padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
+    .bar{flex:1;height:10px;border:1px solid var(--ring);border-radius:999px;overflow:hidden;background:var(--barbg)}
+    .bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+
+    main{padding:var(--space)}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:768px){ .grid{grid-template-columns:repeat(2,minmax(320px,1fr));} }
+
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:var(--radius);padding:14px}
+    .title{display:flex;align-items:center;gap:10px}
+    .title h3{margin:0;font-size:17px;font-weight:800}
+    .translation{margin:6px 0 6px;color:var(--muted)}
+    .recite{margin:8px 0;padding:12px 14px;border:1px solid var(--ring);border-radius:12px;background:var(--chip);font-weight:800;font-size:clamp(18px,5.6vw,24px);line-height:1.35;letter-spacing:.2px;text-align:center;color:var(--text)}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+    .tag{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
+
+    .goal{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .progress{flex:1;height:10px;background:var(--barbg);border:1px solid var(--ring);border-radius:999px;overflow:hidden}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+    .count{min-width:96px;text-align:right;font-weight:800}
+
+    .controls{display:flex;gap:8px;margin-top:10px}
+    .primary{appearance:none;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:12px;height:var(--tap);padding:0 18px;font-size:18px;font-weight:800;flex:1}
+    .ghost{appearance:none;border:1px solid var(--ring);background:transparent;color:var(--muted);border-radius:12px;min-width:44px;height:44px}
+
+    .audioBtn{appearance:none;border:1px solid var(--ring);background:var(--chip);border-radius:999px;min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
+
+    .subgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+    .sub{border:1px dashed var(--ring);border-radius:12px;padding:10px}
+    .sub h4{margin:0 0 6px 0;font-size:16px;font-weight:800;text-align:center}
+
+    .foot{margin-top:8px;color:var(--muted);font-size:13px}
+    .kbd{border:1px solid var(--ring);border-radius:6px;background:var(--chip);color:var(--muted);padding:2px 6px}
   </style>
 </head>
 <body>
@@ -116,13 +74,12 @@
     <div class="container">
       <div class="row">
         <div>
-          <h1>Adhkâr — Aujourd'hui</h1>
+          <h1>Adhkâr</h1>
           <div class="subtitle" id="subtitle"></div>
         </div>
-        <div class="right">
-          <button id="resetGlobal" class="btn warn" title="Purge complète des données et remise à zéro">Réinit. global</button>
-        </div>
+        <div class="right"><button id="resetGlobal" class="btn warn">Réinit. global</button></div>
       </div>
+      <div class="filters" id="filters"></div>
       <div class="overall">
         <span class="pill">Progression</span>
         <div class="bar"><div id="overallBar"></div></div>
@@ -131,348 +88,94 @@
     </div>
   </header>
 
-  <main class="container">
-    <section class="grid" id="cards"></section>
-    <div class="footer">
-      <div>💧 Les ablutions ne sont <b>pas obligatoires</b> pour ces adhkâr (mais recommandées).</div>
-      <div class="small">Données stockées en local • iPhone/iPad • PWA hors‑ligne</div>
-    </div>
+  <main>
+    <section id="cards" class="grid"></section>
   </main>
 
-  <!-- Bottom thumb-friendly filter bar -->
-  <nav class="bottombar">
-    <div id="filters" class="filterstrip" aria-label="Filtres"></div>
-  </nav>
-
-  <!-- iOS Install banner -->
-  <div class="install-banner" id="installBanner">
-    <div class="install-card">
-      <span>📲 <b>Installer</b> sur iPhone : touchez <b>Partager</b> → <b>Ajouter à l'écran d'accueil</b>.</span>
-      <button class="btn" id="hideBanner">J'ai compris</button>
-      <button class="btn close" id="closeBanner">✕</button>
-    </div>
-  </div>
-
 <script>
-// --- Données des invocations ------------------------------------------------
-const INVOCATIONS = [
-  { id:'tasbih-post-salah', title:'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar', transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)', translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand', moment:['Après la prière'], wudu:'Non obligatoire mais recommandé', source:'Sahih Muslim 597', type:'triple', parts:[
-    { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
-    { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
-    { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
-  ]},
-  { id:'subhan-wa-bi-hamdih', title:'Subḥân Allâh wa bi-ḥamdih', transcription:'Subḥân Allâh wa bi-ḥamdih', translation:'Gloire à Allah et louange à Lui', moment:['Matin','Soir','Toute la journée'], wudu:'Non', source:'Sahih Muslim 2691', goal:100 },
-  { id:'tahlil-100', title:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…', transcription:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr', translation:'Nul n’est digne d’être adoré en dehors d’Allah…', moment:['Matin','Soir'], wudu:'Non', source:'Sahih al-Bukhari 3293', goal:100 },
-  { id:'istighfar', title:'Astaghfirullâh', transcription:'Astaghfirullâh', translation:'Je demande pardon à Allah', moment:['Toute la journée'], wudu:'Non', source:'Sahih Muslim 2702', goal:100 },
-  { id:'salat-ala-nabi', title:'Allâhumma ṣalli ʿalâ Muḥammad…', transcription:'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad', translation:'Ô Allah, prie sur Muhammad et sur sa famille', moment:['Toute la journée','Vendredi (recommandé)'], wudu:'Non', source:'Sahih al-Bukhari 6357', goal:null },
-  { id:'tasbih-sommeil', title:'Tasbîḥ Fâṭima (avant de dormir)', transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)', translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand', moment:['Avant de dormir'], wudu:'Non', source:'Sahih al-Bukhari 6318', type:'triple', parts:[
-    { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
-    { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
-    { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
-  ]}
+var INVOCATIONS=[
+  {id:'tasbih-post-salah',title:'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Après la prière'],wudu:'Non obligatoire mais recommandé',source:'Sahih Muslim 597',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]},
+  {id:'subhan-wa-bi-hamdih',title:'Subḥân Allâh wa bi-ḥamdih',transcription:'Subḥân Allâh wa bi-ḥamdih',translation:'Gloire à Allah et louange à Lui',moment:['Matin','Soir','Toute la journée'],wudu:'Non',source:'Sahih Muslim 2691',goal:100},
+  {id:'tahlil-100',title:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…',transcription:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr',translation:'Nul n’est digne d’être adoré en dehors d’Allah…',moment:['Matin','Soir'],wudu:'Non',source:'Sahih al-Bukhari 3293',goal:100},
+  {id:'istighfar',title:'Astaghfirullâh',transcription:'Astaghfirullâh',translation:'Je demande pardon à Allah',moment:['Toute la journée'],wudu:'Non',source:'Sahih Muslim 2702',goal:100},
+  {id:'salat-ala-nabi',title:'Allâhumma ṣalli ʿalâ Muḥammad…',transcription:'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad',translation:'Ô Allah, prie sur Muhammad et sur sa famille',moment:['Toute la journée','Vendredi (recommandé)'],wudu:'Non',source:'Sahih al-Bukhari 6357',goal:null},
+  {id:'tasbih-sommeil',title:'Tasbîḥ Fâṭima (avant de dormir)',transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',moment:['Avant de dormir'],wudu:'Non',source:'Sahih al-Bukhari 6318',type:'triple',parts:[{key:'subhanallah',label:'Subḥân Allâh',goal:33},{key:'alhamdulillah',label:'Al-ḥamdu li-llâh',goal:33},{key:'allahuakbar',label:'Allâhu akbar',goal:34}]}
 ];
+var FILTERS=['Tout','Après la prière','Matin','Soir','Toute la journée','Avant de dormir'];
 
-const FILTERS = ['Tout','Après la prière','Matin','Soir','Toute la journée','Avant de dormir'];
-
-// --- État & persistance ----------------------------------------------------
-const STORAGE_KEY = 'adhkarState.v1';
-const todayKey = () => new Date().toLocaleDateString('fr-CA');
-
-function defaultState(){
-  const base = { date: todayKey(), counts: {}, custom: [] };
-  for(const inv of INVOCATIONS){
-    if(inv.type === 'triple'){
-      base.counts[inv.id] = { sub:{}, total:0 };
-      for(const p of inv.parts){ base.counts[inv.id].sub[p.key] = 0; }
-    }else{ base.counts[inv.id] = 0; }
-  }
-  return base;
+var AUDIO_BASE='https://archive.org/download/HisnulMuslimAudio_201510/';
+var AUDIO_MAP={
+  'subhan-wa-bi-hamdih':'n130.mp3',
+  'tahlil-100':'n27.mp3',
+  'istighfar':'n132.mp3',
+  'salat-ala-nabi':'n107.mp3',
+  'tasbih-post-salah':'n25.mp3',
+  'tasbih-sommeil':'n111.mp3'
+};
+var audioEl=null,playingId=null,playingBtn=null,stopTimer=null;
+function playAudio(invId,btn){
+  var file=AUDIO_MAP[invId]; if(!file) return; var url=AUDIO_BASE+file;
+  if(!audioEl){audioEl=new Audio();audioEl.preload='none';}
+  if(playingBtn&&playingBtn!==btn){playingBtn.textContent='🔊';}
+  if(playingId===invId&&!audioEl.paused){audioEl.pause();playingId=null;btn.textContent='🔊';return;}
+  if(!audioEl.paused){audioEl.pause();}
+  playingId=invId; playingBtn=btn; btn.textContent='⏸'; audioEl.src=url; audioEl.currentTime=0;
+  if(stopTimer){clearTimeout(stopTimer);} 
+  audioEl.onplay=function(){if(stopTimer){clearTimeout(stopTimer);} stopTimer=setTimeout(function(){try{audioEl.pause();}catch(e){} playingId=null; if(playingBtn){playingBtn.textContent='🔊'; playingBtn=null;}},16000)};
+  audioEl.onended=function(){playingId=null; if(playingBtn){playingBtn.textContent='🔊'; playingBtn=null;}};
+  audioEl.onerror=function(){playingId=null; if(playingBtn){playingBtn.textContent='🔊'; playingBtn=null;}};
+  audioEl.play().catch(function(){playingId=null; if(playingBtn){playingBtn.textContent='🔊'; playingBtn=null;}});
 }
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const fresh = defaultState();
-    if(!raw) return fresh;
-    const parsed = JSON.parse(raw);
-    if(parsed.date !== todayKey()) return fresh;
-    const st = { date: todayKey(), counts: {}, custom: parsed.custom||[] };
-    for(const inv of INVOCATIONS){
-      if(inv.type==='triple'){
-        const base = { sub:{}, total:0 };
-        for(const p of inv.parts){ base.sub[p.key] = 0; }
-        const saved = parsed.counts?.[inv.id] || {};
-        st.counts[inv.id] = { sub: Object.assign({}, base.sub, saved.sub||{}), total: 0 };
-      }else{ st.counts[inv.id] = Math.max(0, Number(parsed.counts?.[inv.id]||0)); }
-    }
-    return st;
-  }catch(e){ console.warn(e); return defaultState(); }
-}
+var STORAGE_KEY='adhkar.v1';
+function todayKey(){var d=new Date();var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
+function defaultState(){var base={date:todayKey(),counts:{}};for(var i=0;i<INVOCATIONS.length;i++){var inv=INVOCATIONS[i];if(inv.type==='triple'){base.counts[inv.id]={sub:{}};for(var j=0;j<inv.parts.length;j++){base.counts[inv.id].sub[inv.parts[j].key]=0;}}else{base.counts[inv.id]=0;}}return base;}
+function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY),fresh=defaultState();if(!raw) return fresh;var p=JSON.parse(raw);if(p.date!==todayKey()) return fresh;var st={date:todayKey(),counts:{}};for(var i=0;i<INVOCATIONS.length;i++){var inv=INVOCATIONS[i];if(inv.type==='triple'){var base={sub:{}};for(var j=0;j<inv.parts.length;j++){base.sub[inv.parts[j].key]=0;}var s=(p.counts&&p.counts[inv.id])||{};st.counts[inv.id]={sub:Object.assign({},base.sub,s.sub||{})};}else{var v=(p.counts&&p.counts[inv.id])||0;st.counts[inv.id]=Math.max(0,Number(v));}}return st;}catch(e){return defaultState();}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+var state=loadState();
 
-function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-  catch(e){ console.warn('saveState error:', e); }
-}
+function $(s){return document.querySelector(s);} function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+function setSubtitle(){var tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'local';var fmt=new Intl.DateTimeFormat('fr-FR',{dateStyle:'full'});$('#subtitle').textContent=fmt.format(new Date())+' • '+tz;}
+function activeFilter(){var b=$$('.chip').find(function(c){return c.classList.contains('active');});return b?b.dataset.filter:'Tout';}
+function inFilter(inv){var f=activeFilter();if(f==='Tout') return true;return inv.moment&&inv.moment.indexOf(f)>-1;}
+function renderFilters(){var box=$('#filters');box.innerHTML='';for(var i=0;i<FILTERS.length;i++){(function(f,i){var b=document.createElement('button');b.className='chip'+(i===0?' active':'');b.textContent=f;b.dataset.filter=f;b.onclick=function(){$$('.chip').forEach(function(c){c.classList.remove('active');});b.classList.add('active');renderCards();updateOverall();};box.appendChild(b);})(FILTERS[i],i);}}
+function pct(n){return Math.max(0,Math.min(100,Math.round(n)));}
+function cardProgress(inv){if(inv.type==='triple'){var e=state.counts[inv.id];var goal=inv.parts.reduce(function(a,p){return a+p.goal;},0);var cur=Object.keys(e.sub).reduce(function(a,k){return a+(e.sub[k]||0);},0);return {current:cur,goal:goal,pct:(cur/goal)*100};}if(typeof inv.goal==='number'&&inv.goal>0){var c=state.counts[inv.id]||0;return {current:c,goal:inv.goal,pct:(c/inv.goal)*100};}var v=state.counts[inv.id]||0;return {current:v,goal:null,pct:0};}
+function updateOverall(){var withGoals=INVOCATIONS.filter(function(v){return v.type==='triple'||(typeof v.goal==='number'&&v.goal>0);});var done=0,total=0;for(var i=0;i<withGoals.length;i++){var pr=cardProgress(withGoals[i]);done+=Math.min(pr.current,pr.goal);total+=pr.goal;}var p=total?(done/total)*100:0;$('#overallBar').style.width=pct(p)+'%';$('#overallPct').textContent=pct(p)+'%';}
 
-let state = loadState();
-
-// --- UI helpers ------------------------------------------------------------
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-
-function setSubtitle(){
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
-  const fmt = new Intl.DateTimeFormat('fr-FR', { dateStyle:'full' });
-  $('#subtitle').textContent = `${fmt.format(new Date())} • Fuseau: ${tz}`;
-}
-
-function activeFilter(){
-  const btn = $$('.chip').find(c=>c.classList.contains('active'));
-  return btn ? btn.dataset.filter : 'Tout';
-}
-
-function inFilter(inv){
-  const f = activeFilter();
-  if(f==='Tout') return true;
-  return inv.moment?.includes(f);
-}
-
-function renderFilters(){
-  const box = $('#filters');
-  box.innerHTML = '';
-  FILTERS.forEach((f,i)=>{
-    const b = document.createElement('div');
-    b.className = 'chip' + (i===0?' active':'');
-    b.textContent = f;
-    b.dataset.filter = f;
-    b.onclick = ()=>{ $$('.chip').forEach(c=>c.classList.remove('active')); b.classList.add('active'); renderCards(); updateOverall(); };
-    box.appendChild(b);
-  });
-}
-
-function pct(n){ return Math.max(0, Math.min(100, Math.round(n))); }
-
-function cardProgress(inv){
+function renderCards(){var wrap=$('#cards');wrap.innerHTML='';INVOCATIONS.filter(inFilter).forEach(function(inv){var card=document.createElement('article');card.className='card shadow';
+  var head=document.createElement('div');head.className='title';var h3=document.createElement('h3');h3.textContent=inv.title;head.appendChild(h3);var abtn=document.createElement('button');abtn.className='audioBtn';abtn.textContent='🔊';abtn.title='Écouter un exemple court';abtn.onclick=function(){playAudio(inv.id,abtn)};head.appendChild(abtn);card.appendChild(head);
+  var rec=document.createElement('div');rec.className='recite';rec.textContent=inv.transcription;card.appendChild(rec);
+  var tr=document.createElement('div');tr.className='translation';tr.textContent=inv.translation;card.appendChild(tr);
+  var meta=document.createElement('div');meta.className='meta';(inv.moment||[]).forEach(function(m){var t=document.createElement('span');t.className='tag';t.textContent=m;meta.appendChild(t);});var w=document.createElement('span');w.className='tag';w.textContent='Ablutions: '+inv.wudu;meta.appendChild(w);var s=document.createElement('span');s.className='tag';s.textContent='Source: '+inv.source;meta.appendChild(s);card.appendChild(meta);
   if(inv.type==='triple'){
-    const entry = state.counts[inv.id];
-    const totalGoal = inv.parts.reduce((a,p)=>a+p.goal,0);
-    const current = Object.values(entry.sub).reduce((a,n)=>a+n,0);
-    return { current, goal: totalGoal, pct: (current/totalGoal)*100 };
+    var subgrid=document.createElement('div');subgrid.className='subgrid';inv.parts.forEach(function(p){var sub=document.createElement('div');sub.className='sub';var h4=document.createElement('h4');h4.textContent=p.label+' • '+p.goal;sub.appendChild(h4);var g=document.createElement('div');g.className='goal';var prog=document.createElement('div');prog.className='progress';var fill=document.createElement('div');prog.appendChild(fill);var cnt=document.createElement('div');cnt.className='count';g.appendChild(prog);g.appendChild(cnt);sub.appendChild(g);var controls=document.createElement('div');controls.className='controls';var plus=document.createElement('button');plus.className='primary';plus.textContent='+1';var reset=document.createElement('button');reset.className='ghost';reset.textContent='↺';controls.appendChild(plus);controls.appendChild(reset);sub.appendChild(controls);subgrid.appendChild(sub);function sync(){var v=(state.counts[inv.id].sub[p.key]||0);var pc=Math.min(100,(v/p.goal)*100);fill.style.width=pct(pc)+'%';cnt.textContent=v+' / '+p.goal;}function clamp(v){return Math.max(0,Math.min(p.goal,v));}plus.onclick=function(){state.counts[inv.id].sub[p.key]=clamp((state.counts[inv.id].sub[p.key]||0)+1);saveState();sync();syncTotal();};reset.onclick=function(){state.counts[inv.id].sub[p.key]=0;saveState();sync();syncTotal();};sync();});
+    var total=document.createElement('div');total.className='goal';var tp=document.createElement('div');tp.className='progress';var tf=document.createElement('div');tp.appendChild(tf);var tc=document.createElement('div');tc.className='count';total.appendChild(tp);total.appendChild(tc);function syncTotal(){var pr=cardProgress(inv);tf.style.width=pct(pr.pct)+'%';tc.textContent=pr.current+' / '+pr.goal;updateOverall();}card.appendChild(subgrid);card.appendChild(total);setTimeout(syncTotal,0);
+  } else {
+    var g=document.createElement('div');g.className='goal';var prog=document.createElement('div');prog.className='progress';var fill=document.createElement('div');prog.appendChild(fill);var cnt=document.createElement('div');cnt.className='count';g.appendChild(prog);g.appendChild(cnt);card.appendChild(g);var controls=document.createElement('div');controls.className='controls';var plus=document.createElement('button');plus.className='primary';plus.textContent='+1';var reset=document.createElement('button');reset.className='ghost';reset.textContent='↺';controls.appendChild(plus);controls.appendChild(reset);card.appendChild(controls);function sync(){var v=(state.counts[inv.id]||0);if(typeof inv.goal==='number'&&inv.goal>0){var pc=Math.min(100,(v/inv.goal)*100);fill.style.width=pct(pc)+'%';cnt.textContent=v+' / '+inv.goal;}else{fill.style.width='0%';cnt.textContent=String(v);} }function clamp(v){if(typeof inv.goal==='number'&&inv.goal>0){return Math.max(0,Math.min(inv.goal,v));}return Math.max(0,v);}plus.onclick=function(){state.counts[inv.id]=clamp((state.counts[inv.id]||0)+1);saveState();sync();updateOverall();};reset.onclick=function(){state.counts[inv.id]=0;saveState();sync();updateOverall();};sync();
   }
-  if(typeof inv.goal === 'number' && inv.goal>0){
-    const current = state.counts[inv.id]||0;
-    return { current, goal: inv.goal, pct: (current/inv.goal)*100 };
-  }
-  const current = state.counts[inv.id]||0;
-  return { current, goal: null, pct: 0 };
-}
+  
+  wrap.appendChild(card);
+});}
 
-function updateOverall(){
-  const withGoals = INVOCATIONS.filter(v=> (v.type==='triple') || (typeof v.goal==='number' && v.goal>0));
-  let done = 0, total = 0;
-  for(const inv of withGoals){
-    const pr = cardProgress(inv);
-    done += Math.min(pr.current, pr.goal);
-    total += pr.goal;
-  }
-  const p = total? (done/total)*100 : 0;
-  $('#overallBar').style.width = pct(p)+'%';
-  $('#overallPct').textContent = pct(p)+'%';
-}
+function performResetGlobal(){try{localStorage.removeItem(STORAGE_KEY);}catch(e){} state=defaultState();saveState();renderFilters();$$('.chip').forEach(function(c,i){c.classList.toggle('active',i===0);});renderCards();updateOverall();}
 
-// Gesture helpers -----------------------------------------------------------
-function addGestureTap(el, onTap){
-  let touchId=null, moved=false, timer=null, long=false;
-  const longDelay=450; // long press for +10
-  function start(e){
-    moved=false; long=false; touchId=(e.changedTouches? e.changedTouches[0].identifier : 'mouse');
-    timer=setTimeout(()=>{ long=true; onTap('long'); }, longDelay);
-  }
-  function move(e){ moved=true; }
-  function end(e){ if(timer){clearTimeout(timer);} if(!long && !moved) onTap('tap'); touchId=null; }
-  el.addEventListener('touchstart', start, {passive:true});
-  el.addEventListener('touchmove', move, {passive:true});
-  el.addEventListener('touchend', end, {passive:true});
-  el.addEventListener('mousedown', start); el.addEventListener('mouseup', end);
-}
+document.getElementById('resetGlobal').onclick=function(){if(!confirm("Purger TOUTES les données et remettre l'application à zéro ?")) return;performResetGlobal();};
 
-function haptic(){ try{ if(window.navigator.vibrate) window.navigator.vibrate(5); }catch(_){ /* iOS may ignore */ }
-}
-
-function renderCards(){
-  const wrap = $('#cards');
-  wrap.innerHTML = '';
-  INVOCATIONS.filter(inFilter).forEach(inv=>{
-    const card = document.createElement('article');
-    card.className = 'card';
-
-    const title = document.createElement('div'); title.className = 'title'; title.textContent = inv.title; card.appendChild(title);
-    const trans = document.createElement('div'); trans.className = 'trans'; trans.textContent = `${inv.translation}`; card.appendChild(trans);
-
-    const meta = document.createElement('div'); meta.className = 'meta';
-    (inv.moment||[]).forEach(m=>{ const t = document.createElement('span'); t.className='tag'; t.textContent = m; meta.appendChild(t); });
-    const w = document.createElement('span'); w.className='tag'; w.textContent = `Ablutions: ${inv.wudu}`; meta.appendChild(w);
-    const s = document.createElement('span'); s.className='tag'; s.textContent = `Source: ${inv.source}`; meta.appendChild(s);
-    card.appendChild(meta);
-
-    if(inv.type==='triple'){
-      const subgrid = document.createElement('div'); subgrid.className='subgrid';
-      inv.parts.forEach(p=>{
-        const sub = document.createElement('div'); sub.className='sub';
-        sub.innerHTML = `<h4>${p.label} • objectif ${p.goal}</h4>`;
-        const g = document.createElement('div'); g.className='goal';
-        const prog = document.createElement('div'); prog.className='progress';
-        const fill = document.createElement('div'); prog.appendChild(fill);
-        const cnt = document.createElement('div'); cnt.className='count';
-        const controls = document.createElement('div'); controls.className='controls';
-        const minus = document.createElement('button'); minus.className='cbtn'; minus.textContent='−1';
-        const plus10 = document.createElement('button'); plus10.className='cbtn'; plus10.textContent='+10';
-        const reset = document.createElement('button'); reset.className='cbtn'; reset.textContent='↺'; reset.title='Réinitialiser';
-        controls.append(minus, plus10, reset);
-        g.append(prog, cnt); sub.append(g, controls); subgrid.appendChild(sub);
-
-        function sync(){
-          const val = state.counts[inv.id].sub[p.key]||0;
-          const pc = Math.min(100, (val/p.goal)*100);
-          fill.style.width = pct(pc)+'%';
-          cnt.textContent = `${val} / ${p.goal}`;
-        }
-        function clamp(v){ return Math.max(0, Math.min(p.goal, v)); }
-        // Tap anywhere on sub card to +1; long-press for +10
-        addGestureTap(sub, (mode)=>{
-          const inc = (mode==='long')? 10 : 1;
-          state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+inc);
-          saveState(); sync(); syncTotal(); haptic();
-        });
-        minus.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)-1); saveState(); sync(); syncTotal(); haptic(); };
-        plus10.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+10); saveState(); sync(); syncTotal(); haptic(); };
-        reset.onclick = ()=>{ state.counts[inv.id].sub[p.key] = 0; saveState(); sync(); syncTotal(); };
-        sync();
-      });
-
-      const totalLine = document.createElement('div'); totalLine.className='goal';
-      const totalProg = document.createElement('div'); totalProg.className='progress';
-      const totalFill = document.createElement('div'); totalProg.appendChild(totalFill);
-      const totalCnt = document.createElement('div'); totalCnt.className='count';
-      totalLine.append(totalProg, totalCnt);
-
-      function syncTotal(){
-        const pr = cardProgress(inv);
-        totalFill.style.width = pct(pr.pct)+'%';
-        totalCnt.textContent = `${pr.current} / ${pr.goal}`;
-        updateOverall();
-      }
-      card.appendChild(subgrid); card.appendChild(totalLine); setTimeout(syncTotal,0);
-    } else {
-      const g = document.createElement('div'); g.className='goal';
-      const prog = document.createElement('div'); prog.className='progress';
-      const fill = document.createElement('div'); prog.appendChild(fill);
-      const cnt = document.createElement('div'); cnt.className='count';
-      g.append(prog, cnt);
-
-      const controls = document.createElement('div'); controls.className='controls';
-      const minus = document.createElement('button'); minus.className='cbtn'; minus.textContent='−1';
-      const plus10 = document.createElement('button'); plus10.className='cbtn'; plus10.textContent='+10';
-      const reset = document.createElement('button'); reset.className='cbtn'; reset.textContent='↺'; reset.title='Réinitialiser';
-      controls.append(minus, plus10, reset);
-
-      // Big invisible tapzone over the card for +1 (quick one-handed)
-      const tapzone = document.createElement('div'); tapzone.className='tapzone'; tapzone.setAttribute('aria-label','Ajouter 1');
-
-      function sync(){
-        const val = state.counts[inv.id]||0;
-        if(typeof inv.goal==='number' && inv.goal>0){
-          const pc = Math.min(100,(val/inv.goal)*100);
-          fill.style.width = pct(pc)+'%';
-          cnt.textContent = `${val} / ${inv.goal}`;
-        } else { fill.style.width = '0%'; cnt.textContent = `${val}`; }
-      }
-      function clamp(v){ if(typeof inv.goal==='number' && inv.goal>0) return Math.max(0, Math.min(inv.goal, v)); return Math.max(0, v); }
-
-      addGestureTap(tapzone, (mode)=>{
-        const inc = (mode==='long')? 10 : 1;
-        state.counts[inv.id] = clamp((state.counts[inv.id]||0)+inc); saveState(); sync(); updateOverall(); haptic();
-      });
-      minus.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)-1); saveState(); sync(); updateOverall(); haptic(); };
-      plus10.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)+10); saveState(); sync(); updateOverall(); haptic(); };
-      reset.onclick = ()=>{ state.counts[inv.id] = 0; saveState(); sync(); updateOverall(); };
-
-      card.append(g, controls, tapzone); sync();
-    }
-
-    const foot = document.createElement('div'); foot.className='footer small mute';
-    foot.innerHTML = `<span>Transcription: <span class="kbd">${inv.transcription}</span></span>`;
-    card.appendChild(foot);
-
-    wrap.appendChild(card);
-  });
-}
-
-// --- Reset & Global --------------------------------------------------------
-function performResetDay(){
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){ console.warn('removeItem error:', e); }
-  state = defaultState(); saveState(); renderFilters(); $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0)); renderCards(); updateOverall();
-}
-function performResetGlobal(){
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){ console.warn('removeItem error:', e); }
-  state = defaultState(); saveState(); renderFilters(); $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0)); renderCards(); updateOverall();
-}
-
-const btnResetGlobal = $('#resetGlobal'); if(btnResetGlobal){ btnResetGlobal.onclick = ()=>{ if(!confirm("Purger TOUTES les données et remettre l'application à zéro ?")) return; performResetGlobal(); alert('Réinitialisation complète effectuée.'); }; }
-
-// --- PWA: manifest + service worker (inline) -------------------------------
-async function setupPWA(){
-  function makeIcon(size){ const c=document.createElement('canvas'); c.width=size; c.height=size; const ctx=c.getContext('2d'); const g=ctx.createLinearGradient(0,0,size,size); g.addColorStop(0,'#1d4ed8'); g.addColorStop(1,'#0ea5e9'); ctx.fillStyle=g; ctx.fillRect(0,0,size,size); ctx.fillStyle='rgba(255,255,255,.1)'; ctx.fillRect(0,0,size,size); ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; return c.toDataURL('image/png'); }
-  const icon180=makeIcon(180), icon192=makeIcon(192), icon512=makeIcon(512);
-  const apple=document.createElement('link'); apple.rel='apple-touch-icon'; apple.sizes='180x180'; apple.href=icon180; document.head.appendChild(apple);
-  const manifest={ name:'Adhkâr — Compteur', short_name:'Adhkâr', start_url:'./', display:'standalone', background_color:'#0b132a', theme_color:'#0b132a', icons:[ {src:icon192,sizes:'192x192',type:'image/png',purpose:'any maskable'}, {src:icon512,sizes:'512x512',type:'image/png',purpose:'any maskable'} ] };
-  const mfBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}); const mfLink=document.createElement('link'); mfLink.rel='manifest'; mfLink.href=URL.createObjectURL(mfBlob); document.head.appendChild(mfLink);
-  if('serviceWorker' in navigator){ try{ const swLines=[
+function setupPWA(){function icon(size){var c=document.createElement('canvas');c.width=size;c.height=size;var x=c.getContext('2d');var g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,'#1d4ed8');g.addColorStop(1,'#0ea5e9');x.fillStyle=g;x.fillRect(0,0,size,size);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(0,0,size,size);x.fillStyle='#fff';x.beginPath();x.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='destination-out';x.beginPath();x.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2);x.fill();x.globalCompositeOperation='source-over';return c.toDataURL('image/png');}
+  var a=document.createElement('link');a.rel='apple-touch-icon';a.sizes='180x180';a.href=icon(180);document.head.appendChild(a);
+  var m={name:'Adhkâr — Compteur',short_name:'Adhkâr',start_url:'./',display:'standalone',background_color:'#ffffff',theme_color:'#ffffff',icons:[{src:icon(192),sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:icon(512),sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
+  var mb=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
+  if('serviceWorker' in navigator){try{var sw=new Blob([
     "self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open('adhkar-cache-v1');await c.addAll(['./']);self.skipWaiting();})())});",
     "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});",
     "self.addEventListener('fetch',e=>{e.respondWith((async()=>{const c=await caches.open('adhkar-cache-v1');const r=await c.match(e.request);if(r) return r;try{const f=await fetch(e.request);if(e.request.method==='GET'&&f&&f.status===200&&f.type==='basic'){c.put(e.request,f.clone())}return f;}catch(err){return r||Response.error();}})())});"
-  ]; const swBlob=new Blob(swLines,{type:'text/javascript'}); await navigator.serviceWorker.register(URL.createObjectURL(swBlob)); }catch(err){ console.warn('SW registration failed', err); } }
-  const isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone; if(!isStandalone){ const b=document.getElementById('installBanner'); if(b) b.style.display='block'; }
+  ],{type:'text/javascript'});navigator.serviceWorker.register(URL.createObjectURL(sw));}catch(e){}}
 }
 
-// --- Init ------------------------------------------------------------------
-setSubtitle(); renderFilters(); renderCards(); updateOverall(); setupPWA();
-['hideBanner','closeBanner'].forEach(id=>{ const el=document.getElementById(id); if(el) el.onclick=()=>{ const b=document.getElementById('installBanner'); if(b) b.style.display='none'; }; });
+function msUntilNextMidnight(){var n=new Date();var t=new Date(n);t.setHours(24,0,0,0);return Math.max(0,t-n);} var __midnightTimer=null;function scheduleAutoReset(){if(__midnightTimer) clearTimeout(__midnightTimer);var d=msUntilNextMidnight()+1000;__midnightTimer=setTimeout(function(){if(state.date!==todayKey()){state=defaultState();saveState();renderCards();updateOverall();setSubtitle();}scheduleAutoReset();},d);} 
 
-// --- Auto-reset à minuit ---------------------------------------------------
-function msUntilNextMidnight(){
-  const now = new Date();
-  const next = new Date(now);
-  next.setHours(24,0,0,0); // prochain minuit local
-  return Math.max(0, next - now);
-}
-let __midnightTimer = null;
-function scheduleAutoReset(){
-  if(__midnightTimer) clearTimeout(__midnightTimer);
-  const delay = msUntilNextMidnight() + 1000; // +1s pour passer minuit
-  __midnightTimer = setTimeout(()=>{
-    if(state.date !== todayKey()){
-      performResetDay();
-      setSubtitle();
-    }
-    scheduleAutoReset();
-  }, delay);
-}
-document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState === 'visible'){
-    if(state.date !== todayKey()){
-      performResetDay(); setSubtitle();
-    }
-    scheduleAutoReset();
-  }
-});
-window.addEventListener('focus', ()=>{
-  if(state.date !== todayKey()){
-    performResetDay(); setSubtitle();
-  }
-  scheduleAutoReset();
-});
-scheduleAutoReset();
+setSubtitle(); renderFilters(); renderCards(); updateOverall(); setupPWA(); scheduleAutoReset();
 </script>
 </body>
 </html>
