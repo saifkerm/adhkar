@@ -2,29 +2,35 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <!-- iPhone friendly viewport + notch safe area -->
+  <!-- iPhone & iPad friendly viewport + notch safe area -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0f172a">
-  <title>Adhkâr — iPhone (PWA)</title>
+  <meta name="theme-color" content="#0b132a">
+  <title>Adhkâr — Mobile & Tablet (PWA)</title>
   <style>
     :root{
-      --bg:#0f172a; /* slate-900 */
+      --bg:#0b132a; /* dark indigo */
+      --bg-soft:#0f1a3a;
+      --panel:#0d1634;
       --muted:#94a3b8; /* slate-400 */
-      --text:#f8fafc; /* slate-50 */
+      --text:#f8fbff;
       --brand:#22c55e; /* green-500 */
       --brand-2:#3b82f6; /* blue-500 */
-      --warn:#f59e0b; /* amber-500 */
-      --ring:#334155; /* slate-700 */
-      --chip:#1f2937; /* gray-800 */
-      --card:#0b1228; /* darker */
+      --warn:#f59e0b;
+      --ring:#334155;
+      --chip:#111a33;
+      --card:#0b142e;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --space: 14px;
+      --tap: 16px; /* extra hit slop */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      background:radial-gradient(1200px 800px at 20% -10%,#1f2937 0%,#0f172a 60%),var(--bg);
+      background:radial-gradient(1200px 800px at 20% -10%,#162545 0%,var(--bg) 60%);
       color:var(--text);
       font:17px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
       padding-top:calc(env(safe-area-inset-top));
@@ -36,55 +42,72 @@
     header{
       position:sticky;top:0;z-index:30;
       backdrop-filter:saturate(120%) blur(10px);
-      background:linear-gradient(180deg,#0b1024 0%, #0b1024cc 60%, transparent 100%);
+      background:linear-gradient(180deg, #0b1024 0%, #0b1024cc 60%, transparent 100%);
       border-bottom:1px solid var(--ring);
     }
-    .container{max-width:980px;margin:0 auto;padding:14px}
+    .container{max-width:1100px;margin:0 auto;padding:var(--space)}
     .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
     h1{font-size:clamp(20px,4.5vw,28px);margin:6px 0 2px}
     .subtitle{color:var(--muted);font-size:13px}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-    .chip{padding:10px 12px;border-radius:999px;background:var(--chip);border:1px solid var(--ring);cursor:pointer;user-select:none}
-    .chip.active{outline:2px solid var(--brand)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:12px}
-    .card{background:linear-gradient(180deg,#0c142e,#0a1024);border:1px solid var(--ring);border-radius:16px;padding:14px;box-shadow:0 10px 30px #00000040}
-    .title{font-weight:700}
-    .trans{color:var(--muted);font-size:14px}
-    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-    .meta .tag{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
-    .goal{display:flex;align-items:center;gap:12px;margin-top:10px}
-    .progress{height:12px;background:#111827;border:1px solid var(--ring);border-radius:999px;overflow:hidden;flex:1}
-    .progress>div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));width:0}
-    .count{font-weight:700;min-width:100px;text-align:right}
-    .controls{display:flex;gap:8px;margin-top:10px}
-    button{appearance:none;border:1px solid var(--ring);background:#0b1228;color:#f8fafc;padding:12px 14px;border-radius:14px;cursor:pointer;touch-action:manipulation}
-    button:active{transform:scale(.98)}
-    button.primary{background:linear-gradient(180deg,#1d4ed8,#1e40af);border-color:#1d4ed8}
-    button.warn{background:linear-gradient(180deg,#b45309,#92400e);border-color:#b45309}
-    button.ghost{background:#0b1228;border-style:dashed}
-    .subgrid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
-    .sub{border:1px dashed var(--ring);border-radius:12px;padding:10px}
-    .sub h4{margin:0 0 6px 0;font-size:15px}
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted);font-size:14px;gap:10px;flex-wrap:wrap}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--ring)}
+
+    /* Top actions */
+    .right{margin-left:auto; display:flex; gap:10px; align-items:center}
+    .btn{appearance:none;border:1px solid var(--ring);background:#0b1228;color:#f8fafc;padding:12px 14px;border-radius:14px;cursor:pointer;touch-action:manipulation}
+    .btn.warn{background:linear-gradient(180deg,#b45309,#92400e);border-color:#b45309}
+    .btn:active{transform:scale(.98)}
+
+    /* Progress header */
     .overall{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--ring)}
     .overall .bar{flex:1;height:14px;border:1px solid var(--ring);border-radius:999px;overflow:hidden;background:#0b1228}
     .overall .bar>div{height:100%;background:linear-gradient(90deg,var(--brand),#10b981);width:0}
+    #overallPct{min-width:56px;text-align:center}
+
+    /* Cards grid */
+    main{padding-bottom:84px; /* space for bottom bar */}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+    @media (min-width:700px){ .grid{grid-template-columns:repeat(2,minmax(320px,1fr));} }
+    @media (min-width:1024px){ .grid{grid-template-columns:repeat(3,minmax(320px,1fr));} }
+
+    .card{background:linear-gradient(180deg,var(--card),#0a1024);border:1px solid var(--ring);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);position:relative}
+    .title{font-weight:800;font-size:18px}
+    .trans{color:var(--muted);font-size:14px;margin-top:2px}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .meta .tag{font-size:12px;padding:6px 10px;border:1px solid var(--ring);border-radius:999px;color:var(--muted)}
+
+    .goal{display:flex;align-items:center;gap:12px;margin-top:10px}
+    .progress{height:14px;background:#111827;border:1px solid var(--ring);border-radius:999px;overflow:hidden;flex:1}
+    .progress>div{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));width:0}
+    .count{font-weight:800;min-width:110px;text-align:right}
+
+    /* Big tap area: tap card to +1 */
+    .tapzone{position:absolute;inset:0;border-radius:inherit}
+    .tapzone:active{outline:2px solid rgba(255,255,255,.05)}
+
+    /* Controls row */
+    .controls{display:flex;gap:8px;margin-top:10px}
+    .cbtn{appearance:none;border:1px solid var(--ring);background:#0b1228;color:#f8fafc;padding:12px 14px;border-radius:12px;cursor:pointer;touch-action:manipulation}
+    .cbtn.primary{background:linear-gradient(180deg,#1d4ed8,#1e40af);border-color:#1d4ed8}
+    .cbtn:active{transform:scale(.98)}
+
+    /* Triple (Fatima) sub-counters */
+    .subgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    .sub{border:1px dashed var(--ring);border-radius:14px;padding:12px;background:linear-gradient(180deg,#0d1733,#0b132a)}
+    .sub h4{margin:0 0 6px 0;font-size:15px}
+
+    /* Footer note */
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted);font-size:14px;gap:10px;flex-wrap:wrap}
     .kbd{border:1px solid var(--ring);padding:2px 6px;border-radius:6px;background:#0b1228;color:var(--muted);font-size:12px}
-    .mute{color:var(--muted)}
-    .small{font-size:12px}
-    .right{margin-left:auto}
-    .link{color:#93c5fd;text-decoration:none}
-    .link:hover{text-decoration:underline}
-    details#testsPanel{margin:20px 0}
-    details#testsPanel summary{cursor:pointer;color:#93c5fd}
-    #testLog{background:#0b1228;border:1px solid var(--ring);border-radius:12px;padding:10px;white-space:pre-wrap}
+
+    /* Bottom filter bar: thumb-friendly, sticky */
+    .bottombar{position:sticky;bottom:0;z-index:40;background:linear-gradient(180deg, rgba(11,16,36,.4), rgba(11,16,36,.85));backdrop-filter:blur(10px);border-top:1px solid var(--ring);padding:10px calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+    .filterstrip{display:flex;gap:8px;overflow:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+    .chip{scroll-snap-align:start; padding:12px 14px;border-radius:999px;background:var(--chip);border:1px solid var(--ring);cursor:pointer;user-select:none;white-space:nowrap}
+    .chip.active{outline:2px solid var(--brand)}
 
     /* Install banner (iOS instructions) */
-    .install-banner{position:sticky;bottom:0;z-index:40;display:none}
-    .install-card{margin:12px auto;max-width:980px;padding:10px 12px;border:1px dashed var(--ring);border-radius:14px;background:rgba(17,24,39,.85);backdrop-filter:blur(8px);display:flex;gap:10px;align-items:center}
-    .install-card b{white-space:nowrap}
-    .install-card button{padding:8px 10px}
+    .install-banner{position:sticky;bottom:72px;z-index:45;display:none}
+    .install-card{margin:12px auto;max-width:1100px;padding:10px 12px;border:1px dashed var(--ring);border-radius:14px;background:rgba(17,24,39,.85);backdrop-filter:blur(8px);display:flex;gap:10px;align-items:center}
     .install-card .close{margin-left:auto}
   </style>
 </head>
@@ -93,21 +116,15 @@
     <div class="container">
       <div class="row">
         <div>
-          <h1>Suivi quotidien des invocations (adhkâr)</h1>
+          <h1>Adhkâr — Aujourd'hui</h1>
           <div class="subtitle" id="subtitle"></div>
         </div>
         <div class="right">
-          <button id="resetDay" class="warn" title="Remet à zéro uniquement la journée en cours (compteurs)">Réinitialiser (aujourd'hui)</button>
-          <button id="resetGlobal" class="warn" title="Purge complète des données et remise à zéro">Réinit. global</button>
-          <button id="export" class="ghost">Exporter</button>
-          <input id="importFile" type="file" accept="application/json" style="display:none" />
-          <button id="import" class="ghost">Importer</button>
-          <button id="installHelp" class="ghost" title="Installer sur l'iPhone">Installer</button>
+          <button id="resetGlobal" class="btn warn" title="Purge complète des données et remise à zéro">Réinit. global</button>
         </div>
       </div>
-      <div class="chips" id="filters"></div>
       <div class="overall">
-        <span class="pill">Progression du jour</span>
+        <span class="pill">Progression</span>
         <div class="bar"><div id="overallBar"></div></div>
         <span id="overallPct" class="pill">0%</span>
       </div>
@@ -116,98 +133,43 @@
 
   <main class="container">
     <section class="grid" id="cards"></section>
-    <details id="testsPanel">
-      <summary>Afficher les tests (dev)</summary>
-      <pre id="testLog">Aucun test exécuté.</pre>
-    </details>
     <div class="footer">
-      <div>💧 Les ablutions ne sont <b>pas obligatoires</b> pour ces adhkâr (mais recommandées). 🕌</div>
-      <div class="small">Données stockées en local sur votre appareil (localStorage). Compatible iPhone, mode plein écran (PWA) et hors-ligne.</div>
+      <div>💧 Les ablutions ne sont <b>pas obligatoires</b> pour ces adhkâr (mais recommandées).</div>
+      <div class="small">Données stockées en local • iPhone/iPad • PWA hors‑ligne</div>
     </div>
   </main>
+
+  <!-- Bottom thumb-friendly filter bar -->
+  <nav class="bottombar">
+    <div id="filters" class="filterstrip" aria-label="Filtres"></div>
+  </nav>
 
   <!-- iOS Install banner -->
   <div class="install-banner" id="installBanner">
     <div class="install-card">
-      <span>📲 <b>Installer</b> sur iPhone : touchez <b>Partager</b> (icône <span class="kbd">⎋</span>) puis <b>Ajouter à l'écran d'accueil</b>.</span>
-      <button class="ghost" id="hideBanner">J'ai compris</button>
-      <button class="ghost close" id="closeBanner">✕</button>
+      <span>📲 <b>Installer</b> sur iPhone : touchez <b>Partager</b> → <b>Ajouter à l'écran d'accueil</b>.</span>
+      <button class="btn" id="hideBanner">J'ai compris</button>
+      <button class="btn close" id="closeBanner">✕</button>
     </div>
   </div>
 
 <script>
-// --- Données des invocations ---------------------------------------------
+// --- Données des invocations ------------------------------------------------
 const INVOCATIONS = [
-  {
-    id: 'tasbih-post-salah',
-    title: 'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar',
-    transcription: 'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',
-    translation: 'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',
-    moment: ['Après la prière'],
-    wudu: 'Non obligatoire mais recommandé',
-    source: 'Sahih Muslim 597',
-    type: 'triple',
-    parts: [
-      { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
-      { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
-      { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
-    ]
-  },
-  {
-    id: 'subhan-wa-bi-hamdih',
-    title: 'Subḥân Allâh wa bi-ḥamdih',
-    transcription: 'Subḥân Allâh wa bi-ḥamdih',
-    translation: 'Gloire à Allah et louange à Lui',
-    moment: ['Matin', 'Soir', 'Toute la journée'],
-    wudu: 'Non',
-    source: 'Sahih Muslim 2691',
-    goal: 100
-  },
-  {
-    id: 'tahlil-100',
-    title: 'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…',
-    transcription: 'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr',
-    translation: 'Nul n’est digne d’être adoré en dehors d’Allah…',
-    moment: ['Matin', 'Soir'],
-    wudu: 'Non',
-    source: 'Sahih al-Bukhari 3293',
-    goal: 100
-  },
-  {
-    id: 'istighfar',
-    title: 'Astaghfirullâh',
-    transcription: 'Astaghfirullâh',
-    translation: 'Je demande pardon à Allah',
-    moment: ['Toute la journée'],
-    wudu: 'Non',
-    source: 'Sahih Muslim 2702',
-    goal: 100
-  },
-  {
-    id: 'salat-ala-nabi',
-    title: 'Allâhumma ṣalli ʿalâ Muḥammad…',
-    transcription: 'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad',
-    translation: 'Ô Allah, prie sur Muhammad et sur sa famille',
-    moment: ['Toute la journée','Vendredi (recommandé)'],
-    wudu: 'Non',
-    source: 'Sahih al-Bukhari 6357',
-    goal: null
-  },
-  {
-    id: 'tasbih-sommeil',
-    title: 'Tasbîḥ Fâṭima (avant de dormir)',
-    transcription: 'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)',
-    translation: 'Gloire à Allah – Louange à Allah – Allah est le Plus Grand',
-    moment: ['Avant de dormir'],
-    wudu: 'Non',
-    source: 'Sahih al-Bukhari 6318',
-    type: 'triple',
-    parts: [
-      { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
-      { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
-      { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
-    ]
-  }
+  { id:'tasbih-post-salah', title:'Subḥân Allâh – Al-ḥamdu li-llâh – Allâhu akbar', transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)', translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand', moment:['Après la prière'], wudu:'Non obligatoire mais recommandé', source:'Sahih Muslim 597', type:'triple', parts:[
+    { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
+    { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
+    { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
+  ]},
+  { id:'subhan-wa-bi-hamdih', title:'Subḥân Allâh wa bi-ḥamdih', transcription:'Subḥân Allâh wa bi-ḥamdih', translation:'Gloire à Allah et louange à Lui', moment:['Matin','Soir','Toute la journée'], wudu:'Non', source:'Sahih Muslim 2691', goal:100 },
+  { id:'tahlil-100', title:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah…', transcription:'Lâ ilâha illa-llâh waḥdahu lâ sharîka lah, lahu-l-mulku wa lahu-l-ḥamdu wa huwa ʿalâ kulli shay’in qadîr', translation:'Nul n’est digne d’être adoré en dehors d’Allah…', moment:['Matin','Soir'], wudu:'Non', source:'Sahih al-Bukhari 3293', goal:100 },
+  { id:'istighfar', title:'Astaghfirullâh', transcription:'Astaghfirullâh', translation:'Je demande pardon à Allah', moment:['Toute la journée'], wudu:'Non', source:'Sahih Muslim 2702', goal:100 },
+  { id:'salat-ala-nabi', title:'Allâhumma ṣalli ʿalâ Muḥammad…', transcription:'Allâhumma ṣalli ʿalâ Muḥammad wa ʿalâ âli Muḥammad', translation:'Ô Allah, prie sur Muhammad et sur sa famille', moment:['Toute la journée','Vendredi (recommandé)'], wudu:'Non', source:'Sahih al-Bukhari 6357', goal:null },
+  { id:'tasbih-sommeil', title:'Tasbîḥ Fâṭima (avant de dormir)', transcription:'Subḥân Allâh (33) – Al-ḥamdu li-llâh (33) – Allâhu akbar (34)', translation:'Gloire à Allah – Louange à Allah – Allah est le Plus Grand', moment:['Avant de dormir'], wudu:'Non', source:'Sahih al-Bukhari 6318', type:'triple', parts:[
+    { key:'subhanallah', label:'Subḥân Allâh', goal:33 },
+    { key:'alhamdulillah', label:'Al-ḥamdu li-llâh', goal:33 },
+    { key:'allahuakbar', label:'Allâhu akbar', goal:34 },
+  ]}
 ];
 
 const FILTERS = ['Tout','Après la prière','Matin','Soir','Toute la journée','Avant de dormir'];
@@ -222,9 +184,7 @@ function defaultState(){
     if(inv.type === 'triple'){
       base.counts[inv.id] = { sub:{}, total:0 };
       for(const p of inv.parts){ base.counts[inv.id].sub[p.key] = 0; }
-    }else{
-      base.counts[inv.id] = 0;
-    }
+    }else{ base.counts[inv.id] = 0; }
   }
   return base;
 }
@@ -242,13 +202,8 @@ function loadState(){
         const base = { sub:{}, total:0 };
         for(const p of inv.parts){ base.sub[p.key] = 0; }
         const saved = parsed.counts?.[inv.id] || {};
-        st.counts[inv.id] = {
-          sub: Object.assign({}, base.sub, saved.sub||{}),
-          total: 0
-        };
-      }else{
-        st.counts[inv.id] = Math.max(0, Number(parsed.counts?.[inv.id]||0));
-      }
+        st.counts[inv.id] = { sub: Object.assign({}, base.sub, saved.sub||{}), total: 0 };
+      }else{ st.counts[inv.id] = Math.max(0, Number(parsed.counts?.[inv.id]||0)); }
     }
     return st;
   }catch(e){ console.warn(e); return defaultState(); }
@@ -325,6 +280,25 @@ function updateOverall(){
   $('#overallPct').textContent = pct(p)+'%';
 }
 
+// Gesture helpers -----------------------------------------------------------
+function addGestureTap(el, onTap){
+  let touchId=null, moved=false, timer=null, long=false;
+  const longDelay=450; // long press for +10
+  function start(e){
+    moved=false; long=false; touchId=(e.changedTouches? e.changedTouches[0].identifier : 'mouse');
+    timer=setTimeout(()=>{ long=true; onTap('long'); }, longDelay);
+  }
+  function move(e){ moved=true; }
+  function end(e){ if(timer){clearTimeout(timer);} if(!long && !moved) onTap('tap'); touchId=null; }
+  el.addEventListener('touchstart', start, {passive:true});
+  el.addEventListener('touchmove', move, {passive:true});
+  el.addEventListener('touchend', end, {passive:true});
+  el.addEventListener('mousedown', start); el.addEventListener('mouseup', end);
+}
+
+function haptic(){ try{ if(window.navigator.vibrate) window.navigator.vibrate(5); }catch(_){ /* iOS may ignore */ }
+}
+
 function renderCards(){
   const wrap = $('#cards');
   wrap.innerHTML = '';
@@ -332,59 +306,46 @@ function renderCards(){
     const card = document.createElement('article');
     card.className = 'card';
 
-    const title = document.createElement('div');
-    title.className = 'title';
-    title.textContent = inv.title;
+    const title = document.createElement('div'); title.className = 'title'; title.textContent = inv.title; card.appendChild(title);
+    const trans = document.createElement('div'); trans.className = 'trans'; trans.textContent = `${inv.translation}`; card.appendChild(trans);
 
-    const trans = document.createElement('div');
-    trans.className = 'trans';
-    trans.textContent = `${inv.translation}`;
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    (inv.moment||[]).forEach(m=>{
-      const t = document.createElement('span'); t.className='tag'; t.textContent = m; meta.appendChild(t);
-    });
+    const meta = document.createElement('div'); meta.className = 'meta';
+    (inv.moment||[]).forEach(m=>{ const t = document.createElement('span'); t.className='tag'; t.textContent = m; meta.appendChild(t); });
     const w = document.createElement('span'); w.className='tag'; w.textContent = `Ablutions: ${inv.wudu}`; meta.appendChild(w);
     const s = document.createElement('span'); s.className='tag'; s.textContent = `Source: ${inv.source}`; meta.appendChild(s);
-
-    card.appendChild(title);
-    card.appendChild(trans);
     card.appendChild(meta);
 
     if(inv.type==='triple'){
-      const subgrid = document.createElement('div');
-      subgrid.className='subgrid';
-
+      const subgrid = document.createElement('div'); subgrid.className='subgrid';
       inv.parts.forEach(p=>{
-        const sub = document.createElement('div');
-        sub.className='sub';
+        const sub = document.createElement('div'); sub.className='sub';
         sub.innerHTML = `<h4>${p.label} • objectif ${p.goal}</h4>`;
         const g = document.createElement('div'); g.className='goal';
         const prog = document.createElement('div'); prog.className='progress';
         const fill = document.createElement('div'); prog.appendChild(fill);
         const cnt = document.createElement('div'); cnt.className='count';
         const controls = document.createElement('div'); controls.className='controls';
-        const minus = document.createElement('button'); minus.textContent='−1';
-        const plus1 = document.createElement('button'); plus1.textContent='+1'; plus1.className='primary';
-        const plus10 = document.createElement('button'); plus10.textContent='+10';
-        const reset = document.createElement('button'); reset.textContent='↺'; reset.className='ghost'; reset.title='Réinitialiser ce sous-compteur';
-        controls.append(minus, plus1, plus10, reset);
-        g.append(prog, cnt);
-        sub.append(g, controls);
-        subgrid.appendChild(sub);
+        const minus = document.createElement('button'); minus.className='cbtn'; minus.textContent='−1';
+        const plus10 = document.createElement('button'); plus10.className='cbtn'; plus10.textContent='+10';
+        const reset = document.createElement('button'); reset.className='cbtn'; reset.textContent='↺'; reset.title='Réinitialiser';
+        controls.append(minus, plus10, reset);
+        g.append(prog, cnt); sub.append(g, controls); subgrid.appendChild(sub);
 
         function sync(){
           const val = state.counts[inv.id].sub[p.key]||0;
           const pc = Math.min(100, (val/p.goal)*100);
           fill.style.width = pct(pc)+'%';
           cnt.textContent = `${val} / ${p.goal}`;
-          try{ if(window.navigator.vibrate) window.navigator.vibrate(5);}catch(_){/* iOS ignore */}
         }
         function clamp(v){ return Math.max(0, Math.min(p.goal, v)); }
-        minus.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)-1); saveState(); sync(); syncTotal(); };
-        plus1.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+1); saveState(); sync(); syncTotal(); };
-        plus10.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+10); saveState(); sync(); syncTotal(); };
+        // Tap anywhere on sub card to +1; long-press for +10
+        addGestureTap(sub, (mode)=>{
+          const inc = (mode==='long')? 10 : 1;
+          state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+inc);
+          saveState(); sync(); syncTotal(); haptic();
+        });
+        minus.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)-1); saveState(); sync(); syncTotal(); haptic(); };
+        plus10.onclick = ()=>{ state.counts[inv.id].sub[p.key] = clamp((state.counts[inv.id].sub[p.key]||0)+10); saveState(); sync(); syncTotal(); haptic(); };
         reset.onclick = ()=>{ state.counts[inv.id].sub[p.key] = 0; saveState(); sync(); syncTotal(); };
         sync();
       });
@@ -401,10 +362,7 @@ function renderCards(){
         totalCnt.textContent = `${pr.current} / ${pr.goal}`;
         updateOverall();
       }
-
-      card.appendChild(subgrid);
-      card.appendChild(totalLine);
-      setTimeout(syncTotal,0);
+      card.appendChild(subgrid); card.appendChild(totalLine); setTimeout(syncTotal,0);
     } else {
       const g = document.createElement('div'); g.className='goal';
       const prog = document.createElement('div'); prog.className='progress';
@@ -413,11 +371,13 @@ function renderCards(){
       g.append(prog, cnt);
 
       const controls = document.createElement('div'); controls.className='controls';
-      const minus = document.createElement('button'); minus.textContent='−1';
-      const plus1 = document.createElement('button'); plus1.textContent='+1'; plus1.className='primary';
-      const plus10 = document.createElement('button'); plus10.textContent='+10';
-      const reset = document.createElement('button'); reset.textContent='↺'; reset.className='ghost'; reset.title='Réinitialiser';
-      controls.append(minus, plus1, plus10, reset);
+      const minus = document.createElement('button'); minus.className='cbtn'; minus.textContent='−1';
+      const plus10 = document.createElement('button'); plus10.className='cbtn'; plus10.textContent='+10';
+      const reset = document.createElement('button'); reset.className='cbtn'; reset.textContent='↺'; reset.title='Réinitialiser';
+      controls.append(minus, plus10, reset);
+
+      // Big invisible tapzone over the card for +1 (quick one-handed)
+      const tapzone = document.createElement('div'); tapzone.className='tapzone'; tapzone.setAttribute('aria-label','Ajouter 1');
 
       function sync(){
         const val = state.counts[inv.id]||0;
@@ -425,23 +385,19 @@ function renderCards(){
           const pc = Math.min(100,(val/inv.goal)*100);
           fill.style.width = pct(pc)+'%';
           cnt.textContent = `${val} / ${inv.goal}`;
-        } else {
-          fill.style.width = '0%';
-          cnt.textContent = `${val}`;
-        }
-        try{ if(window.navigator.vibrate) window.navigator.vibrate(5);}catch(_){/* iOS ignore */}
+        } else { fill.style.width = '0%'; cnt.textContent = `${val}`; }
       }
-      function clamp(v){
-        if(typeof inv.goal==='number' && inv.goal>0) return Math.max(0, Math.min(inv.goal, v));
-        return Math.max(0, v);
-      }
-      minus.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)-1); saveState(); sync(); updateOverall(); };
-      plus1.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)+1); saveState(); sync(); updateOverall(); };
-      plus10.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)+10); saveState(); sync(); updateOverall(); };
+      function clamp(v){ if(typeof inv.goal==='number' && inv.goal>0) return Math.max(0, Math.min(inv.goal, v)); return Math.max(0, v); }
+
+      addGestureTap(tapzone, (mode)=>{
+        const inc = (mode==='long')? 10 : 1;
+        state.counts[inv.id] = clamp((state.counts[inv.id]||0)+inc); saveState(); sync(); updateOverall(); haptic();
+      });
+      minus.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)-1); saveState(); sync(); updateOverall(); haptic(); };
+      plus10.onclick = ()=>{ state.counts[inv.id] = clamp((state.counts[inv.id]||0)+10); saveState(); sync(); updateOverall(); haptic(); };
       reset.onclick = ()=>{ state.counts[inv.id] = 0; saveState(); sync(); updateOverall(); };
 
-      card.append(g, controls);
-      sync();
+      card.append(g, controls, tapzone); sync();
     }
 
     const foot = document.createElement('div'); foot.className='footer small mute';
@@ -452,231 +408,71 @@ function renderCards(){
   });
 }
 
-// --- Export / Import / Reset ----------------------------------------------
+// --- Reset & Global --------------------------------------------------------
 function performResetDay(){
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){ console.warn('removeItem error:', e); }
-  state = defaultState();
-  saveState();
-  renderFilters();
-  $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0));
-  renderCards();
-  updateOverall();
+  state = defaultState(); saveState(); renderFilters(); $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0)); renderCards(); updateOverall();
 }
-
 function performResetGlobal(){
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){ console.warn('removeItem error:', e); }
-  state = defaultState();
-  saveState();
-  renderFilters();
-  $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0));
-  renderCards();
-  updateOverall();
+  state = defaultState(); saveState(); renderFilters(); $$('.chip').forEach((c,i)=> c.classList.toggle('active', i===0)); renderCards(); updateOverall();
 }
 
-$('#resetDay').onclick = ()=>{
-  if(!confirm("Réinitialiser toutes les invocations pour aujourd'hui ?")) return;
-  performResetDay();
-};
+const btnResetGlobal = $('#resetGlobal'); if(btnResetGlobal){ btnResetGlobal.onclick = ()=>{ if(!confirm("Purger TOUTES les données et remettre l'application à zéro ?")) return; performResetGlobal(); alert('Réinitialisation complète effectuée.'); }; }
 
-$('#resetGlobal').onclick = ()=>{
-  if(!confirm("Purger TOUTES les données et remettre l'application à zéro ?")) return;
-  performResetGlobal();
-};
-
-$('#export').onclick = ()=>{
-  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `adhkar_${todayKey()}.json`; a.click(); URL.revokeObjectURL(a.href);
-};
-$('#import').onclick = ()=> $('#importFile').click();
-$('#importFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{ const obj = JSON.parse(reader.result);
-      if(obj && obj.counts){ state = { date: todayKey(), counts: obj.counts, custom: obj.custom||[] }; saveState(); renderCards(); updateOverall(); alert('Import réussi.'); }
-      else alert('Fichier invalide.');
-    }catch(err){ alert('Import impossible: '+err.message); }
-  };
-  reader.readAsText(file);
-});
-
-// --- PWA: manifest + service worker (sans fichiers externes) ---------------
+// --- PWA: manifest + service worker (inline) -------------------------------
 async function setupPWA(){
-  // 1) Génère dynamiquement une icône PNG (180/192/512) compatible iOS
-  function makeIcon(size){
-    const c = document.createElement('canvas'); c.width=size; c.height=size; const ctx=c.getContext('2d');
-    const g = ctx.createLinearGradient(0,0,size,size); g.addColorStop(0,'#1d4ed8'); g.addColorStop(1,'#0ea5e9');
-    ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-    ctx.fillStyle='rgba(255,255,255,.1)'; ctx.fillRect(0,0,size,size);
-    // simple moon/star mark
-    ctx.fillStyle='white';
-    ctx.beginPath(); ctx.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2); ctx.fill();
-    ctx.globalCompositeOperation='destination-out';
-    ctx.beginPath(); ctx.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2); ctx.fill();
-    ctx.globalCompositeOperation='source-over';
-    return c.toDataURL('image/png');
-  }
-  const icon180 = makeIcon(180), icon192 = makeIcon(192), icon512 = makeIcon(512);
-  // Apple touch icon
-  const apple = document.createElement('link'); apple.rel='apple-touch-icon'; apple.sizes='180x180'; apple.href=icon180; document.head.appendChild(apple);
-  // 2) Manifest en Blob URL
-  const manifest = {
-    name: 'Adhkâr — Compteur',
-    short_name: 'Adhkâr',
-    start_url: './',
-    display: 'standalone',
-    background_color: '#0f172a',
-    theme_color: '#0f172a',
-    icons: [
-      { src: icon192, sizes:'192x192', type:'image/png', purpose:'any maskable' },
-      { src: icon512, sizes:'512x512', type:'image/png', purpose:'any maskable' }
-    ]
-  };
-  const mfBlob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-  const mfLink = document.createElement('link'); mfLink.rel='manifest'; mfLink.href=URL.createObjectURL(mfBlob); document.head.appendChild(mfLink);
-
-  // 3) Service Worker via Blob pour cache hors-ligne
-  if('serviceWorker' in navigator){
-    try{
-      const swLines = [
-        "self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open('adhkar-cache-v1');await c.addAll(['./']);self.skipWaiting();})())});",
-        "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});",
-        "self.addEventListener('fetch',e=>{e.respondWith((async()=>{const c=await caches.open('adhkar-cache-v1');const r=await c.match(e.request);if(r) return r;try{const f=await fetch(e.request);if(e.request.method==='GET'&&f&&f.status===200&&f.type==='basic'){c.put(e.request,f.clone())}return f;}catch(err){return r||Response.error();}})())});"
-      ];
-      const swBlob = new Blob(swLines, {type:'text/javascript'});
-      const reg = await navigator.serviceWorker.register(URL.createObjectURL(swBlob));
-      // iOS n'affiche pas de prompt — on montrera un bandeau avec instructions
-    }catch(err){ console.warn('SW registration failed', err); }
-  }
-
-  // 4) Affiche un bandeau d'installation sur iOS non-standalone
-  const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
-  if(!isStandalone){ const b = document.getElementById('installBanner'); if(b) b.style.display='block'; }
+  function makeIcon(size){ const c=document.createElement('canvas'); c.width=size; c.height=size; const ctx=c.getContext('2d'); const g=ctx.createLinearGradient(0,0,size,size); g.addColorStop(0,'#1d4ed8'); g.addColorStop(1,'#0ea5e9'); ctx.fillStyle=g; ctx.fillRect(0,0,size,size); ctx.fillStyle='rgba(255,255,255,.1)'; ctx.fillRect(0,0,size,size); ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(size*0.42,size*0.42,size*0.22,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(size*0.5,size*0.36,size*0.22,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; return c.toDataURL('image/png'); }
+  const icon180=makeIcon(180), icon192=makeIcon(192), icon512=makeIcon(512);
+  const apple=document.createElement('link'); apple.rel='apple-touch-icon'; apple.sizes='180x180'; apple.href=icon180; document.head.appendChild(apple);
+  const manifest={ name:'Adhkâr — Compteur', short_name:'Adhkâr', start_url:'./', display:'standalone', background_color:'#0b132a', theme_color:'#0b132a', icons:[ {src:icon192,sizes:'192x192',type:'image/png',purpose:'any maskable'}, {src:icon512,sizes:'512x512',type:'image/png',purpose:'any maskable'} ] };
+  const mfBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}); const mfLink=document.createElement('link'); mfLink.rel='manifest'; mfLink.href=URL.createObjectURL(mfBlob); document.head.appendChild(mfLink);
+  if('serviceWorker' in navigator){ try{ const swLines=[
+    "self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open('adhkar-cache-v1');await c.addAll(['./']);self.skipWaiting();})())});",
+    "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});",
+    "self.addEventListener('fetch',e=>{e.respondWith((async()=>{const c=await caches.open('adhkar-cache-v1');const r=await c.match(e.request);if(r) return r;try{const f=await fetch(e.request);if(e.request.method==='GET'&&f&&f.status===200&&f.type==='basic'){c.put(e.request,f.clone())}return f;}catch(err){return r||Response.error();}})())});"
+  ]; const swBlob=new Blob(swLines,{type:'text/javascript'}); await navigator.serviceWorker.register(URL.createObjectURL(swBlob)); }catch(err){ console.warn('SW registration failed', err); } }
+  const isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone; if(!isStandalone){ const b=document.getElementById('installBanner'); if(b) b.style.display='block'; }
 }
 
 // --- Init ------------------------------------------------------------------
-setSubtitle();
-renderFilters();
-renderCards();
-updateOverall();
-setupPWA();
+setSubtitle(); renderFilters(); renderCards(); updateOverall(); setupPWA();
+['hideBanner','closeBanner'].forEach(id=>{ const el=document.getElementById(id); if(el) el.onclick=()=>{ const b=document.getElementById('installBanner'); if(b) b.style.display='none'; }; });
 
-// Bannière iOS
-document.getElementById('installHelp').onclick = ()=>{
-  const b=document.getElementById('installBanner'); if(b) b.style.display='block';
-};
-['hideBanner','closeBanner'].forEach(id=>{
-  const el=document.getElementById(id); if(el) el.onclick=()=>{ const b=document.getElementById('installBanner'); if(b) b.style.display='none'; };
+// --- Auto-reset à minuit ---------------------------------------------------
+function msUntilNextMidnight(){
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(24,0,0,0); // prochain minuit local
+  return Math.max(0, next - now);
+}
+let __midnightTimer = null;
+function scheduleAutoReset(){
+  if(__midnightTimer) clearTimeout(__midnightTimer);
+  const delay = msUntilNextMidnight() + 1000; // +1s pour passer minuit
+  __midnightTimer = setTimeout(()=>{
+    if(state.date !== todayKey()){
+      performResetDay();
+      setSubtitle();
+    }
+    scheduleAutoReset();
+  }, delay);
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible'){
+    if(state.date !== todayKey()){
+      performResetDay(); setSubtitle();
+    }
+    scheduleAutoReset();
+  }
 });
-
-// --- Tests (légers, non destructifs) --------------------------------------
-(function runTests(){
-  const logEl = document.getElementById('testLog');
-  const logs = [];
-  const pass = m=>logs.push('✅ '+m);
-  const fail = m=>logs.push('❌ '+m);
-
-  function computeOverall(){
-    const withGoals = INVOCATIONS.filter(v=> (v.type==='triple') || (typeof v.goal==='number' && v.goal>0));
-    let done = 0, total = 0;
-    for(const inv of withGoals){
-      if(inv.type==='triple'){
-        const entry = state.counts[inv.id];
-        const current = Object.values(entry.sub).reduce((a,n)=>a+n,0);
-        const goal = inv.parts.reduce((a,p)=>a+p.goal,0);
-        done += Math.min(current, goal); total += goal;
-      } else {
-        const current = state.counts[inv.id]||0;
-        done += Math.min(current, inv.goal); total += inv.goal;
-      }
-    }
-    return {done,total,pct: total? Math.round((done/total)*100):0};
+window.addEventListener('focus', ()=>{
+  if(state.date !== todayKey()){
+    performResetDay(); setSubtitle();
   }
-
-  try{
-    // 1) defaultState couvre toutes les invocations & initialise à 0
-    const ds = defaultState();
-    let ok1 = true;
-    for(const inv of INVOCATIONS){
-      if(inv.type==='triple'){
-        const entry = ds.counts[inv.id];
-        ok1 = ok1 && entry && entry.sub && inv.parts.every(p=> entry.sub[p.key]===0);
-      } else {
-        ok1 = ok1 && typeof ds.counts[inv.id] === 'number' && ds.counts[inv.id]===0;
-      }
-    }
-    ok1 ? pass('defaultState() initialise correctement tous les compteurs')
-        : fail('defaultState() n\'initialise pas correctement');
-
-    // 2) cardProgress calcule correctement pour un triple
-    const sample = JSON.parse(JSON.stringify(ds));
-    const triple = INVOCATIONS.find(v=>v.type==='triple');
-    if(triple){
-      sample.counts[triple.id].sub[triple.parts[0].key] = triple.parts[0].goal; // remplir 1er segment
-      const oldState = state; state = sample; // switch temporaire
-      const pr = cardProgress(triple);
-      state = oldState; // restore
-      const expected = triple.parts[0].goal;
-      pr.current===expected ? pass('cardProgress(triple) cumule correctement') : fail('cardProgress(triple) incorrect');
-    } else {
-      pass('Aucun triple à tester — ok');
-    }
-
-    // 3) loadState retourne un état frais si la date est ancienne (sans persister)
-    const backup = localStorage.getItem(STORAGE_KEY);
-    try{
-      const stale = { date:'1900-01-01', counts:{}, custom:[] };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stale));
-      const st = loadState();
-      st.date === todayKey() ? pass('loadState() réinitialise quand la date est périmée') : fail('loadState() ne réinitialise pas la date périmée');
-    } finally {
-      if(backup===null) localStorage.removeItem(STORAGE_KEY); else localStorage.setItem(STORAGE_KEY, backup);
-    }
-
-    // 4) performResetDay remet bien à zéro et la progression devient 0%
-    const some = INVOCATIONS.find(v=> v.type!=='triple' && typeof v.goal==='number');
-    if(some){ state.counts[some.id] = Math.min(5, some.goal); }
-    const tri = INVOCATIONS.find(v=> v.type==='triple');
-    if(tri){ const k = tri.parts[0].key; state.counts[tri.id].sub[k] = Math.min(3, tri.parts[0].goal); }
-    saveState();
-    const p1 = computeOverall().pct;
-    performResetDay();
-    const p2 = computeOverall().pct;
-    (p1>0 && p2===0) ? pass('performResetDay() remet la progression globale à 0%') : fail('performResetDay() n\'a pas remis la progression à 0%');
-
-    // 5) performResetGlobal purge aussi les données custom
-    state.custom = ['test']; saveState();
-    performResetGlobal();
-    Array.isArray(state.custom) && state.custom.length===0 ? pass('performResetGlobal() purge les données custom') : fail('performResetGlobal() n\'a pas purgé les données custom');
-
-    // 6) renderFilters crée le bon nombre de filtres et active "Tout"
-    renderFilters();
-    const chips = Array.from(document.querySelectorAll('.chip'));
-    (chips.length === FILTERS.length) ? pass('renderFilters() crée toutes les puces') : fail('renderFilters() ne crée pas le bon nombre de puces');
-    (activeFilter() === 'Tout') ? pass('renderFilters() active par défaut "Tout"') : fail('Le filtre actif par défaut n\'est pas "Tout"');
-
-    // 7) performResetGlobal conserve bien le filtre "Tout" actif et remet l'avancement à 0%
-    const some2 = INVOCATIONS.find(v=> v.type!=='triple' && typeof v.goal==='number');
-    if(some2){ state.counts[some2.id] = Math.min(7, some2.goal); saveState(); }
-    const beforePct = computeOverall().pct;
-    performResetGlobal();
-    const afterPct = computeOverall().pct;
-    (activeFilter() === 'Tout') ? pass('Après réinit. globale, filtre "Tout" actif') : fail('Après réinit. globale, mauvais filtre actif');
-    (beforePct>=0 && afterPct===0) ? pass('Après réinit. globale, progression = 0%') : fail('Après réinit. globale, progression ≠ 0%');
-
-    // 8) PWA: manifest link + apple touch icon présents
-    const hasManifest = !!document.querySelector('link[rel="manifest"]');
-    const hasTouch = !!document.querySelector('link[rel="apple-touch-icon"]');
-    hasManifest ? pass('Manifest présent') : fail('Manifest absent');
-    hasTouch ? pass('Apple touch icon présent') : fail('Apple touch icon absent');
-
-  }catch(e){
-    fail('Exception dans les tests: '+e.message);
-  }
-
-  logEl.textContent = logs.join('\n');
-})();
+  scheduleAutoReset();
+});
+scheduleAutoReset();
 </script>
 </body>
 </html>
