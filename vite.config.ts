@@ -8,6 +8,7 @@ const basePath = "/adhkar/";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: basePath,
   plugins: [
     react(),
     tailwindcss(),
