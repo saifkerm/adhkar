@@ -108,7 +108,7 @@ export const INVOCATIONS: Invocation[] = [
   {
     id: "ayat-kursi",
     title: "Āyat al-Kursī (2:255)",
-    transcription: "Āyat al-Kursī",
+    transcription: "Āyat al-Kursī (2:255)",
     translation:
       "Allah ! Nulle divinité en dehors de Lui, le Vivant, Celui qui subsiste par Lui-même…",
     moment: [

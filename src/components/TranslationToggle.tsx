@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 export function TranslationToggle({ text }: { text: string }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   return (
     <div className="rounded-xl border">
       <button
@@ -12,10 +12,14 @@ export function TranslationToggle({ text }: { text: string }) {
         <span>Traduction (FR)</span>
         <span className="flex items-center gap-1 text-primary">
           {open ? "Masquer" : "Afficher"}
-          <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`}
+          />
         </span>
       </button>
-      {open && <div className="px-4 pb-3 pt-2 text-[15px] leading-relaxed">{text}</div>}
+      {open && (
+        <div className="px-4 pb-3 pt-2 text-[15px] leading-relaxed">{text}</div>
+      )}
     </div>
-  )
+  );
 }
