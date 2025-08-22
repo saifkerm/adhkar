@@ -5,8 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Invocations</title>
-    <script type="module" crossorigin src="/adhkar/assets/index-CG-qDyK6.js"></script>
-    <link rel="stylesheet" crossorigin href="/adhkar/assets/index-DplKeojP.css">
+    <script>
+      (() => {
+        try {
+          const KEY = "adhkar-theme";
+          const saved = localStorage.getItem(KEY);
+          const prefersDark = window.matchMedia?.(
+            "(prefers-color-scheme: dark)"
+          )?.matches;
+          const theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : prefersDark
+              ? "dark"
+              : "light";
+          if (theme === "dark") document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+        } catch {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/adhkar/assets/index-dAszpf3v.js"></script>
+    <link rel="stylesheet" crossorigin href="/adhkar/assets/index-BjdjxGp1.css">
   <link rel="manifest" href="/adhkar/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/adhkar/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
