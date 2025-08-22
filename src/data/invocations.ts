@@ -1,32 +1,71 @@
-export type TriplePart = { key: string; label: string; goal: number };
-export type TripleMomentGoals = Record<string, Record<string, number>>;
+// Énumérations pour éviter la duplication des chaînes
+export enum PrayerTime {
+  FAJR = "Après Fajr",
+  DHUHR = "Après Dhuhr",
+  ASR = "Après ʿAsr",
+  MAGHRIB = "Après Maghrib",
+  ISHA = "Après ʿIshā'",
+}
 
-export type Invocation =
-  | {
-      id: string;
-      title: string;
-      transcription: string;
-      translation: string;
-      moment: string[];
-      wudu: string;
-      source: string;
-      sourceUrl?: string;
-      goal: number | null;
-      type?: undefined;
-    }
-  | {
-      id: string;
-      title: string;
-      transcription: string;
-      translation: string;
-      moment: string[];
-      wudu: string;
-      source: string;
-      sourceUrl?: string;
-      type: "triple";
-      parts: TriplePart[];
-      momentGoals?: TripleMomentGoals;
-    };
+export enum DhikrMoment {
+  MORNING = "Matin",
+  EVENING = "Soir",
+  ALL_DAY = "Toute la journée",
+  BEFORE_SLEEP = "Avant de dormir",
+  AFTER_PRAYER = "Après la prière",
+  FRIDAY_RECOMMENDED = "Vendredi (recommandé)",
+}
+
+// Types de base simplifiés
+export type TriplePart = {
+  key: string;
+  label: string;
+  goal: number;
+};
+
+export type MomentGoals = Record<string, Record<string, number>>;
+
+export type Source = {
+  reference: string;
+  url?: string;
+};
+
+// Interface de base pour les invocations
+interface BaseInvocation {
+  id: string;
+  title: string;
+  transcription: string;
+  translation: string;
+  moments: (PrayerTime | DhikrMoment)[];
+  requiresWudu: boolean;
+  source: Source;
+}
+
+// Invocation simple avec un objectif fixe
+export interface SimpleInvocation extends BaseInvocation {
+  type: "simple";
+  goal: number | null;
+}
+
+// Invocation triple avec des parties distinctes
+export interface TripleInvocation extends BaseInvocation {
+  type: "triple";
+  parts: TriplePart[];
+  momentGoals?: MomentGoals;
+}
+
+export type Invocation = SimpleInvocation | TripleInvocation;
+
+// Configuration des invocations - plus DRY
+const COMMON_POST_PRAYER_MOMENTS = [
+  PrayerTime.FAJR,
+  PrayerTime.DHUHR,
+  PrayerTime.ASR,
+  PrayerTime.MAGHRIB,
+  PrayerTime.ISHA,
+];
+
+const MORNING_EVENING_MOMENTS = [PrayerTime.FAJR, PrayerTime.MAGHRIB];
 
 export const INVOCATIONS: Invocation[] = [
   {
@@ -34,17 +73,16 @@ export const INVOCATIONS: Invocation[] = [
     title: "Astaghfirullāh (après la prière)",
     transcription: "Astaghfirullāh",
     translation: "Je demande pardon à Allah",
-    moment: [
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Hisn al-Muslim",
+    type: "simple",
+    moments: COMMON_POST_PRAYER_MOMENTS,
+    requiresWudu: false,
+    source: {
+      reference: "Sahih Muslim 591",
+      url: "https://sunnah.com/muslim:2691",
+    },
     goal: 3,
   },
+
   {
     id: "salam-post-salah",
     title: "Allāhumma anta-s-salām…",
@@ -52,129 +90,122 @@ export const INVOCATIONS: Invocation[] = [
       "Allāhumma anta-s-salām wa minka-s-salām, tabārakta yā dhā-l-jalāl wal-ikrām",
     translation:
       "Ô Allah, Tu es la Paix et de Toi vient la Paix. Béni sois-Tu, ô Détenteur de Majesté et de Munificence",
-    moment: [
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Sahih Muslim",
+    type: "simple",
+    moments: COMMON_POST_PRAYER_MOMENTS,
+    requiresWudu: false,
+    source: {
+      reference: "Sahih Muslim 591",
+      url: "https://sunnah.com/muslim:2691",
+    },
     goal: 1,
   },
+
   {
     id: "tasbih-post-salah",
     title: "Tasbîḥ après la prière (33/33/33)",
     transcription:
       "Subḥānallāh (33) – Al-ḥamdu li-llāh (33) – Allāhu akbar (33)",
     translation: "Gloire à Allah – Louange à Allah – Allah est le Plus Grand",
-    moment: [
-      "Après la prière",
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Sahih Muslim",
     type: "triple",
+    moments: [DhikrMoment.AFTER_PRAYER, ...COMMON_POST_PRAYER_MOMENTS],
+    requiresWudu: false,
+    source: { reference: "Sahih Muslim" },
     parts: [
       { key: "subhanallah", label: "Subḥānallāh", goal: 33 },
       { key: "alhamdulillah", label: "Al-ḥamdu li-llāh", goal: 33 },
       { key: "allahuakbar", label: "Allāhu akbar", goal: 33 },
     ],
   },
+
   {
     id: "tahlil-post-salah-once",
     title: "Tahlīl (compléter après la prière)",
     transcription:
-      "Lā ilāha illā Allāh, waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay’in qadīr",
+      "Lā ilāha illā Allāh, waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay'in qadīr",
     translation:
-      "Nul n’est digne d’être adoré en dehors d’Allah, Unique, sans associé; à Lui la royauté et la louange; Il est capable de toute chose",
-    moment: [
-      "Après la prière",
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Sahih Muslim",
+      "Nul n'est digne d'être adoré en dehors d'Allah, Unique, sans associé; à Lui la royauté et la louange; Il est capable de toute chose",
+    type: "simple",
+    moments: [DhikrMoment.AFTER_PRAYER, ...COMMON_POST_PRAYER_MOMENTS],
+    requiresWudu: false,
+    source: { reference: "Sahih Muslim" },
     goal: 1,
   },
+
   {
     id: "ayat-kursi",
     title: "Āyat al-Kursī (2:255)",
     transcription: "Āyat al-Kursī (2:255)",
     translation:
       "Allah ! Nulle divinité en dehors de Lui, le Vivant, Celui qui subsiste par Lui-même…",
-    moment: [
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Coran 2:255",
-    sourceUrl: "https://quran.com/2/255",
+    type: "simple",
+    moments: COMMON_POST_PRAYER_MOMENTS,
+    requiresWudu: false,
+    source: {
+      reference: "Coran 2:255",
+      url: "https://quran.com/2/255",
+    },
     goal: 1,
   },
+
   {
     id: "three-quls",
     title: "Sourates 112, 113, 114",
     transcription:
       "Qul huwa-llāhu aḥad • Qul aʿūdhu birabbil-falaq • Qul aʿūdhu birabbin-nās",
     translation:
-      "Dis : Il est Allah, Unique • Dis : Je cherche refuge auprès du Seigneur de l’aube naissante • Dis : Je cherche refuge auprès du Seigneur des hommes",
-    moment: [
-      "Après Fajr",
-      "Après Dhuhr",
-      "Après ʿAsr",
-      "Après Maghrib",
-      "Après ʿIshā’",
-    ],
-    wudu: "Non",
-    source: "Coran 112 • 113 • 114",
+      "Dis : Il est Allah, Unique • Dis : Je cherche refuge auprès du Seigneur de l'aube naissante • Dis : Je cherche refuge auprès du Seigneur des hommes",
     type: "triple",
+    moments: COMMON_POST_PRAYER_MOMENTS,
+    requiresWudu: false,
+    source: {
+      reference: "Sunan an-Nasa'i 1335",
+      url: "https://sunnah.com/nasai:1335",
+    },
     parts: [
       { key: "ikhlas", label: "S.112 — al-Ikhlāṣ", goal: 1 },
       { key: "falaq", label: "S.113 — al-Falaq", goal: 1 },
       { key: "nas", label: "S.114 — an-Nās", goal: 1 },
     ],
     momentGoals: {
-      "Après Fajr": { ikhlas: 3, falaq: 3, nas: 3 },
-      "Après Maghrib": { ikhlas: 3, falaq: 3, nas: 3 },
-      "Après Dhuhr": { ikhlas: 1, falaq: 1, nas: 1 },
-      "Après ʿAsr": { ikhlas: 1, falaq: 1, nas: 1 },
-      "Après ʿIshā’": { ikhlas: 1, falaq: 1, nas: 1 },
+      [PrayerTime.FAJR]: { ikhlas: 3, falaq: 3, nas: 3 },
+      [PrayerTime.MAGHRIB]: { ikhlas: 3, falaq: 3, nas: 3 },
+      [PrayerTime.DHUHR]: { ikhlas: 1, falaq: 1, nas: 1 },
+      [PrayerTime.ASR]: { ikhlas: 1, falaq: 1, nas: 1 },
+      [PrayerTime.ISHA]: { ikhlas: 1, falaq: 1, nas: 1 },
     },
   },
+
   {
     id: "tahlil-10",
     title: "Tahlīl (10× — yuḥyī wa yumīt)",
     transcription:
-      "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, yuḥyī wa yumīt, wa huwa ʿalā kulli shay’in qadīr",
+      "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, yuḥyī wa yumīt, wa huwa ʿalā kulli shay'in qadīr",
     translation:
-      "Il n’y a de divinité qu’Allah, Unique, sans associé. À Lui la royauté et la louange. Il fait vivre et mourir, et Il est capable de toute chose",
-    moment: ["Après Fajr", "Après Maghrib"],
-    wudu: "Non",
-    source: "Hisn al-Muslim",
+      "Il n'y a de divinité qu'Allah, Unique, sans associé. À Lui la royauté et la louange. Il fait vivre et mourir, et Il est capable de toute chose",
+    type: "simple",
+    moments: MORNING_EVENING_MOMENTS,
+    requiresWudu: false,
+    source: {
+      reference: "Jami` at-Tirmidhi 3474",
+      url: "https://sunnah.com/tirmidhi:3474",
+    },
     goal: 10,
   },
+
   {
     id: "duaa-ilman-nafian",
     title: "Invocation du matin après Fajr",
     transcription:
-      "Allāhumma innī as’aluka ʿilman nāfiʿan, wa rizqan ṭayyiban, wa ʿamalan mutaqabbalan",
+      "Allāhumma innī as'aluka ʿilman nāfiʿan, wa rizqan ṭayyiban, wa ʿamalan mutaqabbalan",
     translation:
       "Ô Allah, je Te demande une science utile, une subsistance licite et des œuvres agréées",
-    moment: ["Après Fajr"],
-    wudu: "Non",
-    source: "Hisn al-Muslim",
+    type: "simple",
+    moments: [PrayerTime.FAJR],
+    requiresWudu: false,
+    source: {
+      reference: "Sunan Ibn Majah 925",
+      url: "https://sunnah.com/ibnmajah:925",
+    },
     goal: 1,
   },
 
@@ -183,57 +214,75 @@ export const INVOCATIONS: Invocation[] = [
     title: "Subḥānallāh wa bi-ḥamdih (100×)",
     transcription: "Subḥānallāh wa bi-ḥamdih",
     translation: "Gloire à Allah et louange à Lui",
-    moment: ["Matin", "Soir", "Toute la journée"],
-    wudu: "Non",
-    source: "Sahih Muslim 2691",
-    sourceUrl: "https://sunnah.com/muslim:2691",
+    type: "simple",
+    moments: [DhikrMoment.MORNING, DhikrMoment.EVENING, DhikrMoment.ALL_DAY],
+    requiresWudu: false,
+    source: {
+      reference: "Sahih Muslim 2691",
+      url: "https://sunnah.com/muslim:2691",
+    },
     goal: 100,
   },
+
   {
     id: "tahlil-100",
     title: "Tahlīl (100×)",
     transcription:
-      "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay’in qadīr",
-    translation: "Nul n’est digne d’être adoré en dehors d’Allah…",
-    moment: ["Matin", "Soir"],
-    wudu: "Non",
-    source: "Sahih al-Bukhari 3293",
-    sourceUrl: "https://sunnah.com/bukhari:3293",
+      "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay'in qadīr",
+    translation: "Nul n'est digne d'être adoré en dehors d'Allah…",
+    type: "simple",
+    moments: [DhikrMoment.MORNING, DhikrMoment.EVENING],
+    requiresWudu: false,
+    source: {
+      reference: "Sahih al-Bukhari 3293",
+      url: "https://sunnah.com/bukhari:3293",
+    },
     goal: 100,
   },
+
   {
     id: "istighfar",
     title: "Astaghfirullāh (habituel)",
     transcription: "Astaghfirullāh",
     translation: "Je demande pardon à Allah",
-    moment: ["Toute la journée"],
-    wudu: "Non",
-    source: "Sahih Muslim 2702",
-    sourceUrl: "https://sunnah.com/muslim:2702b",
+    type: "simple",
+    moments: [DhikrMoment.ALL_DAY],
+    requiresWudu: false,
+    source: {
+      reference: "Sahih Muslim 2702",
+      url: "https://sunnah.com/muslim:2702b",
+    },
     goal: 100,
   },
+
   {
     id: "salat-ala-nabi",
     title: "Ṣalāt ʿalā n-Nabī ﷺ",
     transcription: "Allāhumma ṣalli ʿalā Muḥammad wa ʿalā āli Muḥammad",
     translation: "Ô Allah, prie sur Muhammad et sur sa famille",
-    moment: ["Toute la journée", "Vendredi (recommandé)"],
-    wudu: "Non",
-    source: "Sahih al-Bukhari 6357",
-    sourceUrl: "https://sunnah.com/bukhari:6357",
+    type: "simple",
+    moments: [DhikrMoment.ALL_DAY, DhikrMoment.FRIDAY_RECOMMENDED],
+    requiresWudu: false,
+    source: {
+      reference: "Sahih al-Bukhari 6357",
+      url: "https://sunnah.com/bukhari:6357",
+    },
     goal: null,
   },
+
   {
     id: "tasbih-sommeil",
     title: "Tasbîḥ Fāṭima (avant de dormir — 33/33/34)",
     transcription:
       "Subḥānallāh (33) – Al-ḥamdu li-llāh (33) – Allāhu akbar (34)",
     translation: "Gloire à Allah – Louange à Allah – Allah est le Plus Grand",
-    moment: ["Avant de dormir"],
-    wudu: "Non",
-    source: "Sahih al-Bukhari 6318",
-    sourceUrl: "https://sunnah.com/bukhari:6318",
     type: "triple",
+    moments: [DhikrMoment.BEFORE_SLEEP],
+    requiresWudu: false,
+    source: {
+      reference: "Sahih al-Bukhari 6318",
+      url: "https://sunnah.com/bukhari:6318",
+    },
     parts: [
       { key: "subhanallah-sleep", label: "Subḥānallāh", goal: 33 },
       { key: "alhamdulillah-sleep", label: "Al-ḥamdu li-llāh", goal: 33 },
@@ -242,16 +291,18 @@ export const INVOCATIONS: Invocation[] = [
   },
 ];
 
-export const PRAYERS = [
-  "Après Fajr",
-  "Après Dhuhr",
-  "Après ʿAsr",
-  "Après Maghrib",
-  "Après ʿIshā’",
-] as const;
+// Ordre d’affichage des 5 prières (header)
+export const PRAYERS: PrayerTime[] = [
+  PrayerTime.FAJR,
+  PrayerTime.DHUHR,
+  PrayerTime.ASR,
+  PrayerTime.MAGHRIB,
+  PrayerTime.ISHA,
+];
 
-export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
-  "Après Fajr": [
+// Configuration simplifiée des sections
+export const SECTION_CONFIGURATIONS: Record<PrayerTime, string[]> = {
+  [PrayerTime.FAJR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
     "tasbih-post-salah",
@@ -261,7 +312,7 @@ export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
     "tahlil-10",
     "duaa-ilman-nafian",
   ],
-  "Après Dhuhr": [
+  [PrayerTime.DHUHR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
     "tasbih-post-salah",
@@ -269,7 +320,7 @@ export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
     "ayat-kursi",
     "three-quls",
   ],
-  "Après ʿAsr": [
+  [PrayerTime.ASR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
     "tasbih-post-salah",
@@ -277,7 +328,7 @@ export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
     "ayat-kursi",
     "three-quls",
   ],
-  "Après Maghrib": [
+  [PrayerTime.MAGHRIB]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
     "tasbih-post-salah",
@@ -286,7 +337,7 @@ export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
     "three-quls",
     "tahlil-10",
   ],
-  "Après ʿIshā’": [
+  [PrayerTime.ISHA]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
     "tasbih-post-salah",
@@ -295,3 +346,36 @@ export const SECTION_ORDER: Record<(typeof PRAYERS)[number], string[]> = {
     "three-quls",
   ],
 };
+
+// Fonctions utilitaires pour manipuler le modèle
+export class InvocationService {
+  static getInvocationsByMoment(
+    moment: PrayerTime | DhikrMoment
+  ): Invocation[] {
+    return INVOCATIONS.filter((inv) => inv.moments.includes(moment));
+  }
+
+  static getInvocationById(id: string): Invocation | undefined {
+    return INVOCATIONS.find((inv) => inv.id === id);
+  }
+
+  static getGoalForMoment(
+    invocation: Invocation,
+    moment: PrayerTime | DhikrMoment
+  ): number | null {
+    if (invocation.type === "simple") {
+      return invocation.goal;
+    }
+    if (invocation.momentGoals && invocation.momentGoals[moment]) {
+      return Object.values(invocation.momentGoals[moment]).reduce(
+        (sum, goal) => sum + goal,
+        0
+      );
+    }
+    return invocation.parts.reduce((sum, part) => sum + part.goal, 0);
+  }
+
+  static getSectionOrder(prayerTime: PrayerTime): string[] {
+    return SECTION_CONFIGURATIONS[prayerTime] || [];
+  }
+}

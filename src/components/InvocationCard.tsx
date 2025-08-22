@@ -6,16 +6,13 @@ import { TranslationToggle } from "./TranslationToggle";
 import { AudioButton } from "./AudioButton";
 
 type Props = {
-  inv: Invocation;
+  inv: Invocation & { type: "simple" };
   value: number;
   setValue: (v: number) => void;
 };
 
 export function InvocationCard({ inv, value, setValue }: Props) {
-  const goal =
-    typeof (inv as any).goal === "number"
-      ? ((inv as any).goal as number)
-      : null;
+  const goal = typeof inv.goal === "number" ? inv.goal : null;
   const pct = goal ? Math.min(100, Math.round((value / goal) * 100)) : 0;
 
   const bump = () => {
@@ -52,28 +49,20 @@ export function InvocationCard({ inv, value, setValue }: Props) {
         <TranslationToggle text={inv.translation} />
 
         <div className="flex flex-wrap items-center gap-2">
-          {inv.moment?.map((m) => (
-            <span
-              key={m}
-              className="rounded-full border px-3 py-1 text-xs text-muted-foreground"
-            >
-              {m}
-            </span>
-          ))}
           <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground">
-            Ablutions: {inv.wudu}
+            Ablutions: {inv.requiresWudu ? "requises" : "non requises"}
           </span>
-          {inv.sourceUrl ? (
+          {inv.source.url ? (
             <a
-              href={inv.sourceUrl}
+              href={inv.source.url}
               target="_blank"
               className="rounded-full border px-3 py-1 text-xs text-primary underline"
             >
-              Source: {inv.source}
+              Source: {inv.source.reference}
             </a>
           ) : (
             <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground">
-              Source: {inv.source}
+              Source: {inv.source.reference}
             </span>
           )}
         </div>

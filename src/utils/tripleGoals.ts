@@ -1,4 +1,5 @@
 import type { Invocation } from "@/data/invocations";
+import { PrayerTime, DhikrMoment } from "@/data/invocations";
 
 export const slug = (s: string) =>
   s
@@ -6,12 +7,12 @@ export const slug = (s: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, "-");
 
-export const makeKey = (id: string, moment?: string) =>
+export const makeKey = (id: string, moment?: PrayerTime | DhikrMoment) =>
   moment ? `${id}::${slug(moment)}` : id;
 
 export function getTripleGoals(
   inv: Extract<Invocation, { type: "triple" }>,
-  moment?: string
+  moment?: PrayerTime | DhikrMoment
 ) {
   const base: Record<string, number> = Object.fromEntries(
     inv.parts.map((p) => [p.key, p.goal])

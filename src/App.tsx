@@ -2,7 +2,15 @@ import { useMemo, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { INVOCATIONS, PRAYERS, SECTION_ORDER } from "@/data/invocations";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
+import {
+  INVOCATIONS,
+  PRAYERS,
+  SECTION_CONFIGURATIONS,
+  PrayerTime,
+  DhikrMoment,
+} from "@/data/invocations";
 import { useDailyState } from "@/hooks/useDailyState";
 import { InvocationCard } from "@/components/InvocationCard";
 import { TripleInvocationCard } from "@/components/TripleInvocationCard";
@@ -21,7 +29,9 @@ export default function App() {
   const [tab, setTab] = useState<TabKey>("apres");
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activePrayer, setActivePrayer] = useState(currentPrayerLabel());
+  const [activePrayer, setActivePrayer] = useState<PrayerTime>(
+    currentPrayerLabel()
+  );
 
   const setSingle = (key: string, val: number) => {
     setState((s) => ({ ...s, counts: { ...s.counts, [key]: val } }));
@@ -30,16 +40,16 @@ export default function App() {
     setState((s) => ({ ...s, counts: { ...s.counts, [key]: { sub } } }));
   };
 
-  const renderGrid = (ids: string[], contextLabel?: string) => (
+  const renderGrid = (ids: string[], context?: PrayerTime | DhikrMoment) => (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {ids.map((id) => {
         const inv = INVOCATIONS.find((v) => v.id === id);
         if (!inv) return null;
         if (inv.type === "triple") {
-          const goals = getTripleGoals(inv, contextLabel);
+          const goals = getTripleGoals(inv, context);
           const key =
-            inv.momentGoals && contextLabel && inv.momentGoals[contextLabel]
-              ? makeKey(id, contextLabel)
+            inv.momentGoals && context && inv.momentGoals[context as any]
+              ? makeKey(id, context)
               : id;
           const sub = (state.counts[key] as any)?.sub || {};
           return (
@@ -57,7 +67,7 @@ export default function App() {
         return (
           <InvocationCard
             key={key}
-            inv={inv}
+            inv={inv as any}
             value={value}
             setValue={(v) => setSingle(id, v)}
           />
@@ -66,15 +76,15 @@ export default function App() {
     </div>
   );
 
-  const filterByMoment = (label: string) =>
-    INVOCATIONS.filter((v) => v.moment?.includes(label)).map((v) => v.id);
+  const filterByMoment = (m: DhikrMoment) =>
+    INVOCATIONS.filter((v) => v.moments?.includes(m)).map((v) => v.id);
 
   const visibleItemsForOverall = useMemo(() => {
     let pairs: Array<{ key: string; goalTotal: number; current: number }> = [];
 
     if (tab === "apres") {
       const section = activePrayer;
-      const ids = SECTION_ORDER[section] || [];
+      const ids = SECTION_CONFIGURATIONS[section] || [];
       for (const id of ids) {
         const inv = INVOCATIONS.find((v) => v.id === id)!;
         if (inv.type === "triple") {
@@ -98,15 +108,15 @@ export default function App() {
         }
       }
     } else {
-      const label =
+      const label: DhikrMoment | null =
         tab === "matin"
-          ? "Matin"
+          ? DhikrMoment.MORNING
           : tab === "soir"
-          ? "Soir"
+          ? DhikrMoment.EVENING
           : tab === "journee"
-          ? "Toute la journée"
+          ? DhikrMoment.ALL_DAY
           : tab === "sommeil"
-          ? "Avant de dormir"
+          ? DhikrMoment.BEFORE_SLEEP
           : null;
 
       const ids =
@@ -149,8 +159,8 @@ export default function App() {
     return { done, total, pct };
   }, [state, tab, activePrayer]);
 
-  const computePctForPrayer = (section: (typeof PRAYERS)[number]) => {
-    const ids = SECTION_ORDER[section] || [];
+  const computePctForPrayer = (section: PrayerTime) => {
+    const ids = SECTION_CONFIGURATIONS[section] || [];
     let done = 0,
       total = 0;
     for (const id of ids) {
@@ -180,12 +190,12 @@ export default function App() {
     return total ? Math.round((done / total) * 100) : 0;
   };
 
-  const gotoPrayer = (label: (typeof PRAYERS)[number]) => {
+  const gotoPrayer = (label: PrayerTime) => {
     setTab("apres");
     setActivePrayer(label);
   };
 
-  const idxOf = (label: string) => PRAYERS.findIndex((p) => p === label);
+  const idxOf = (label: PrayerTime) => PRAYERS.findIndex((p) => p === label);
   const nextPrayer = () => PRAYERS[(idxOf(activePrayer) + 1) % PRAYERS.length];
   const prevPrayer = () =>
     PRAYERS[(idxOf(activePrayer) - 1 + PRAYERS.length) % PRAYERS.length];
@@ -201,6 +211,7 @@ export default function App() {
         <div className="sa-px mx-auto flex max-w-screen-md flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
           <h1 className="text-[20px] font-extrabold">Adhkâr</h1>
           <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <Button
               variant="outline"
               size="icon"
@@ -224,7 +235,7 @@ export default function App() {
         <HeaderPrayers
           active={activePrayer}
           onChange={(p) => gotoPrayer(p)}
-          getPct={(p) => computePctForPrayer(p as (typeof PRAYERS)[number])}
+          getPct={(p) => computePctForPrayer(p)}
         />
       </header>
 
@@ -251,23 +262,41 @@ export default function App() {
           onValueChange={(v) => setTab(v as TabKey)}
           className="w-full"
         >
-          <TabsContent value="apres" className="mt-2 space-y-1.5">
-            <h2 className="sr-only">{activePrayer}</h2>
-            {renderGrid(SECTION_ORDER[activePrayer] || [], activePrayer)}
+          <TabsContent value="apres" className="mt-2">
+            {renderGrid(
+              SECTION_CONFIGURATIONS[activePrayer] || [],
+              activePrayer
+            )}
           </TabsContent>
 
           <TabsContent value="matin" className="mt-3">
-            {renderGrid(filterByMoment("Matin"))}
+            {renderGrid(
+              filterByMoment(DhikrMoment.MORNING),
+              DhikrMoment.MORNING
+            )}
           </TabsContent>
+
           <TabsContent value="soir" className="mt-3">
-            {renderGrid(filterByMoment("Soir"))}
+            {renderGrid(
+              filterByMoment(DhikrMoment.EVENING),
+              DhikrMoment.EVENING
+            )}
           </TabsContent>
+
           <TabsContent value="journee" className="mt-3">
-            {renderGrid(filterByMoment("Toute la journée"))}
+            {renderGrid(
+              filterByMoment(DhikrMoment.ALL_DAY),
+              DhikrMoment.ALL_DAY
+            )}
           </TabsContent>
+
           <TabsContent value="sommeil" className="mt-3">
-            {renderGrid(filterByMoment("Avant de dormir"))}
+            {renderGrid(
+              filterByMoment(DhikrMoment.BEFORE_SLEEP),
+              DhikrMoment.BEFORE_SLEEP
+            )}
           </TabsContent>
+
           <TabsContent value="tout" className="mt-3">
             {renderGrid(INVOCATIONS.map((v) => v.id))}
           </TabsContent>

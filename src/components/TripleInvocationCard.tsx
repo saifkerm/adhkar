@@ -47,6 +47,25 @@ export function TripleInvocationCard({ inv, sub, setSub, goals }: Props) {
 
         <TranslationToggle text={inv.translation} />
 
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground">
+            Ablutions: {inv.requiresWudu ? "requises" : "non requises"}
+          </span>
+          {inv.source.url ? (
+            <a
+              href={inv.source.url}
+              target="_blank"
+              className="rounded-full border px-3 py-1 text-xs text-primary underline"
+            >
+              Source: {inv.source.reference}
+            </a>
+          ) : (
+            <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground">
+              Source: {inv.source.reference}
+            </span>
+          )}
+        </div>
+
         <div className="grid gap-2">
           {inv.parts.map((p) => {
             const val = sub[p.key] ?? 0;
