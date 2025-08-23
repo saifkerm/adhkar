@@ -1,3 +1,8 @@
+import type { Word } from "@/components/WordPlayer";
+import { istighfarAudio, istighfarVtt, istighfarWords } from "./dhikr/astaghfir";
+import { lailahaAudio, lailahaTranslation, lailahaVtt, lailahaWords } from "./dhikr/la-ilaha";
+import { subhanAudio, subhanVtt, subhanWords } from "./dhikr/subhan";
+
 // Énumérations pour éviter la duplication des chaînes
 export enum PrayerTime {
   FAJR = "Après Fajr",
@@ -39,6 +44,9 @@ interface BaseInvocation {
   moments: (PrayerTime | DhikrMoment)[];
   requiresWudu: boolean;
   source: Source;
+  words?: Word[]
+  audio?: string
+  vtt?: string
 }
 
 // Invocation simple avec un objectif fixe
@@ -81,8 +89,10 @@ export const INVOCATIONS: Invocation[] = [
       url: "https://sunnah.com/muslim:2691",
     },
     goal: 3,
+    words: istighfarWords,
+    audio: istighfarAudio,
+    vtt: istighfarVtt
   },
-
   {
     id: "salam-post-salah",
     title: "Allāhumma anta-s-salām…",
@@ -122,13 +132,15 @@ export const INVOCATIONS: Invocation[] = [
     title: "Tahlīl (compléter après la prière)",
     transcription:
       "Lā ilāha illā Allāh, waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay'in qadīr",
-    translation:
-      "Nul n'est digne d'être adoré en dehors d'Allah, Unique, sans associé; à Lui la royauté et la louange; Il est capable de toute chose",
     type: "simple",
     moments: [DhikrMoment.AFTER_PRAYER, ...COMMON_POST_PRAYER_MOMENTS],
     requiresWudu: false,
     source: { reference: "Sahih Muslim" },
     goal: 1,
+    translation: lailahaTranslation,
+    words: lailahaWords,
+    audio: lailahaAudio,
+    vtt: lailahaVtt
   },
 
   {
@@ -180,8 +192,6 @@ export const INVOCATIONS: Invocation[] = [
     title: "Tahlīl (10× — yuḥyī wa yumīt)",
     transcription:
       "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, yuḥyī wa yumīt, wa huwa ʿalā kulli shay'in qadīr",
-    translation:
-      "Il n'y a de divinité qu'Allah, Unique, sans associé. À Lui la royauté et la louange. Il fait vivre et mourir, et Il est capable de toute chose",
     type: "simple",
     moments: MORNING_EVENING_MOMENTS,
     requiresWudu: false,
@@ -190,6 +200,10 @@ export const INVOCATIONS: Invocation[] = [
       url: "https://sunnah.com/tirmidhi:3474",
     },
     goal: 10,
+    translation: lailahaTranslation,
+    words: lailahaWords,
+    audio: lailahaAudio,
+    vtt: lailahaVtt
   },
 
   {
@@ -222,6 +236,9 @@ export const INVOCATIONS: Invocation[] = [
       url: "https://sunnah.com/muslim:2691",
     },
     goal: 100,
+    words: subhanWords,
+    audio: subhanAudio,
+    vtt: subhanVtt
   },
 
   {
@@ -229,7 +246,6 @@ export const INVOCATIONS: Invocation[] = [
     title: "Tahlīl (100×)",
     transcription:
       "Lā ilāha illā Allāh waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamdu, wa huwa ʿalā kulli shay'in qadīr",
-    translation: "Nul n'est digne d'être adoré en dehors d'Allah…",
     type: "simple",
     moments: [DhikrMoment.MORNING, DhikrMoment.EVENING],
     requiresWudu: false,
@@ -238,6 +254,10 @@ export const INVOCATIONS: Invocation[] = [
       url: "https://sunnah.com/bukhari:3293",
     },
     goal: 100,
+    translation: lailahaTranslation,
+    words: lailahaWords,
+    audio: lailahaAudio,
+    vtt: lailahaVtt
   },
 
   {
@@ -253,6 +273,9 @@ export const INVOCATIONS: Invocation[] = [
       url: "https://sunnah.com/muslim:2702b",
     },
     goal: 100,
+    words: istighfarWords,
+    audio: istighfarAudio,
+    vtt: istighfarVtt
   },
 
   {

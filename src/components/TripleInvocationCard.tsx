@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import type { Invocation } from "@/data/invocations";
-import { TranslationToggle } from "./TranslationToggle";
-import { AudioButton } from "./AudioButton";
 import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { TranslationToggle } from "./TranslationToggle";
 
 type Triple = Extract<Invocation, { type: "triple" }>;
 type Counts = { [k: string]: number };
@@ -54,10 +53,6 @@ export function TripleInvocationCard({ inv, sub, setSub, goals }: Props) {
               }`}
             />
           </button>
-
-          <div onClick={(e) => e.stopPropagation()}>
-            <AudioButton id={inv.id} />
-          </div>
         </div>
       </CardHeader>
 
