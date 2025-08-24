@@ -4,6 +4,7 @@ import ApresPriere from "./pages/ApresPriere";
 import AvantDeDormir from "./pages/AvantDeDormir";
 import Home from "./pages/Home";
 import Matin from "./pages/Matin";
+import Qibla from "./pages/Qibla";
 import Soir from "./pages/Soir";
 import TouteLaJournee from "./pages/TouteLaJournee";
 import Vendredi from "./pages/Vendredi";
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/moment/toute-la-journee" element={<TouteLaJournee />} />
         <Route path="/moment/avant-de-dormir" element={<AvantDeDormir />} />
         <Route path="/moment/vendredi" element={<Vendredi />} />
+        <Route path="/qibla" element={<Qibla />} />
 
         <Route
           path="/moment/:slug"

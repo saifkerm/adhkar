@@ -25,9 +25,7 @@ export const MobileFooter: FC = () => {
           size="icon"
           variant="ghost"
           className="h-10 w-10 rounded-full"
-          onClick={() => {
-            /* TODO : ouvrir la boussole Qibla */
-          }}
+          onClick={() => navigate('/qibla')}
         >
           <Compass className="h-5 w-5 text-foreground" />
         </Button>
