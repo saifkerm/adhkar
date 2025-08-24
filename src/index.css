@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+
+
+
 /* reset utile pour l’app mobile */
 :root {
   color-scheme: light dark;

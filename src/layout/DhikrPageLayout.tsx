@@ -1,4 +1,3 @@
-// src/components/DhikrPageLayout.tsx
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
