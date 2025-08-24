@@ -1,7 +1,7 @@
 export type Cue = { start: number; end: number; i: number };
 
 function msFromParts(h: string, m: string, s: string, ms: string) {
-  return ((+h) * 3600 + (+m) * 60 + (+s)) * 1000 + (+ms || 0);
+  return (+h * 3600 + +m * 60 + +s) * 1000 + (+ms || 0);
 }
 
 export function parseVttFromString(vtt: string): Cue[] {
@@ -14,9 +14,15 @@ export function parseVttFromString(vtt: string): Cue[] {
     i++;
     if (!line) continue;
     if (/^WEBVTT/i.test(line)) continue;
-    if (/^\d+$/.test(line)) { line = (lines[i] || "").trim(); i++; }
+    if (/^\d+$/.test(line)) {
+      line = (lines[i] || "").trim();
+      i++;
+    }
 
-    const tm = /(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})/.exec(line);
+    const tm =
+      /(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})/.exec(
+        line
+      );
     if (!tm) continue;
 
     const sMs = msFromParts(tm[1] || "00", tm[2], tm[3], tm[4]);

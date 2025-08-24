@@ -10,10 +10,8 @@ import Vendredi from "./pages/Vendredi";
 export default function App() {
   return (
     <Routes>
-      {/* Accueil */}
       <Route path="/" element={<Home />} />
 
-      {/* Moments */}
       <Route path="/moment/apres-priere" element={<ApresPriere />} />
       <Route path="/moment/matin" element={<Matin />} />
       <Route path="/moment/soir" element={<Soir />} />
@@ -21,7 +19,6 @@ export default function App() {
       <Route path="/moment/avant-de-dormir" element={<AvantDeDormir />} />
       <Route path="/moment/vendredi" element={<Vendredi />} />
 
-      {/* Fallback pour autres slugs */}
       <Route
         path="/moment/:slug"
         element={
@@ -37,7 +34,6 @@ export default function App() {
         }
       />
 
-      {/* Catch-all global */}
       <Route
         path="*"
         element={
