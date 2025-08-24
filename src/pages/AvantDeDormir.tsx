@@ -1,36 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
-
 import { TripleInvocationCard } from "@/components/TripleInvocationCard";
 import { DhikrMoment, INVOCATIONS } from "@/data/invocations";
-import { useDailyState } from "@/hooks/useDailyState";
 import { getTripleGoals } from "@/utils/tripleGoals";
 
 import InvocationCard from "@/components/InvocationCard";
 import { makeKey } from "@/utils/key";
+import { useInvocationState } from "@/hooks/useInvocationState";
+import { useInvocationsByMoment } from "@/hooks/useInvocationsByMoment";
+import { useProgress } from "@/hooks/useProgress";
 
 export default function AvantDeDormir() {
-  const { state, setState, resetGlobal } = useDailyState(INVOCATIONS);
+  const { state, setSingle, setTriple, resetGlobal } =
+    useInvocationState(INVOCATIONS);
 
   // Filtrer les invocations pour avant de dormir
-  const sommeilInvocations = useMemo(
-    () =>
-      INVOCATIONS.filter((inv) =>
-        inv.moments.includes(DhikrMoment.BEFORE_SLEEP)
-      ),
-    []
+  const sommeilInvocations = useInvocationsByMoment(
+    INVOCATIONS,
+    DhikrMoment.BEFORE_SLEEP
   );
-
-  const setSingle = (key: string, val: number) => {
-    setState((s) => ({ ...s, counts: { ...s.counts, [key]: val } }));
-  };
-
-  const setTriple = (key: string, sub: Record<string, number>) => {
-    setState((s) => ({ ...s, counts: { ...s.counts, [key]: { sub } } }));
-  };
+  const { pct } = useProgress(
+    sommeilInvocations,
+    state,
+    DhikrMoment.BEFORE_SLEEP
+  );
 
   const renderGrid = (invs: typeof INVOCATIONS) => (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-1">
@@ -73,42 +68,6 @@ export default function AvantDeDormir() {
     </div>
   );
 
-  const visibleItemsForOverall = useMemo(() => {
-    const pairs: Array<{ key: string; goalTotal: number; current: number }> =
-      [];
-
-    for (const inv of sommeilInvocations) {
-      if (inv.type === "triple") {
-        const goals = getTripleGoals(inv, DhikrMoment.BEFORE_SLEEP);
-        const key =
-          inv.momentGoals && inv.momentGoals[DhikrMoment.BEFORE_SLEEP]
-            ? makeKey(inv.id, DhikrMoment.BEFORE_SLEEP)
-            : inv.id;
-        const sub = (state.counts[key] as any)?.sub || {};
-        const goalTotal = Object.values(goals).reduce((a, n) => a + n, 0);
-        const current = Object.keys(goals).reduce(
-          (a, k) => a + (sub[k] ?? 0),
-          0
-        );
-        pairs.push({ key, goalTotal, current });
-      } else if (typeof inv.goal === "number") {
-        const key = inv.id;
-        const goalTotal = inv.goal as number;
-        const current = (state.counts[key] as number) ?? 0;
-        pairs.push({ key, goalTotal, current });
-      }
-    }
-
-    let done = 0,
-      total = 0;
-    for (const p of pairs) {
-      done += Math.min(p.current, p.goalTotal);
-      total += p.goalTotal;
-    }
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    return { done, total, pct };
-  }, [state, sommeilInvocations]);
-
   return (
     <main className="min-h-dvh bg-background text-foreground sa-pb">
       <header className="sa-pt sticky top-0 z-20 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -141,10 +100,10 @@ export default function AvantDeDormir() {
             Progression
           </span>
           <div className="sm:flex-1">
-            <Progress value={visibleItemsForOverall.pct} className="h-3" />
+            <Progress value={pct} className="h-3" />
           </div>
           <span className="w-fit rounded-full border px-2.5 py-1 text-[12px] font-bold">
-            {visibleItemsForOverall.pct}%
+            {pct}%
           </span>
         </div>
       </section>

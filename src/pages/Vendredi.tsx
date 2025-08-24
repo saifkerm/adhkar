@@ -6,14 +6,15 @@ import { Link } from "react-router-dom";
 
 import { TripleInvocationCard } from "@/components/TripleInvocationCard";
 import { DhikrMoment, INVOCATIONS } from "@/data/invocations";
-import { useDailyState } from "@/hooks/useDailyState";
 import { getTripleGoals } from "@/utils/tripleGoals";
 
 import InvocationCard from "@/components/InvocationCard";
 import { makeKey } from "@/utils/key";
+import { useInvocationState } from "@/hooks/useInvocationState";
 
 export default function Vendredi() {
-  const { state, setState, resetGlobal } = useDailyState(INVOCATIONS);
+  const { state, setSingle, setTriple, resetGlobal } =
+    useInvocationState(INVOCATIONS);
 
   // Filtrer les invocations pour le vendredi
   const vendrediInvocations = useMemo(
@@ -23,14 +24,6 @@ export default function Vendredi() {
       ),
     []
   );
-
-  const setSingle = (key: string, val: number) => {
-    setState((s) => ({ ...s, counts: { ...s.counts, [key]: val } }));
-  };
-
-  const setTriple = (key: string, sub: Record<string, number>) => {
-    setState((s) => ({ ...s, counts: { ...s.counts, [key]: { sub } } }));
-  };
 
   const renderGrid = (invs: typeof INVOCATIONS) => (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-1">

@@ -41,8 +41,8 @@ export function HeaderPrayers({
   getPct,
 }: {
   active: string;
-  onChange: (label: string) => void;
-  getPct: (label: string) => number;
+  onChange: (label: any) => void;
+  getPct: (label: any) => number;
 }) {
   return (
     <div className="no-scrollbar sa-px overflow-x-auto">
