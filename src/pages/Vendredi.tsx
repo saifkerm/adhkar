@@ -5,22 +5,24 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
 import { TripleInvocationCard } from "@/components/TripleInvocationCard";
-import {
-  DhikrMoment,
-  INVOCATIONS,
-} from "@/data/invocations";
+import { DhikrMoment, INVOCATIONS } from "@/data/invocations";
 import { useDailyState } from "@/hooks/useDailyState";
-import { getTripleGoals, makeKey } from "@/utils/tripleGoals";
+import { getTripleGoals } from "@/utils/tripleGoals";
 
 import InvocationCard from "@/components/InvocationCard";
+import { makeKey } from "@/utils/key";
 
 export default function Vendredi() {
   const { state, setState, resetGlobal } = useDailyState(INVOCATIONS);
 
   // Filtrer les invocations pour le vendredi
-  const vendrediInvocations = useMemo(() =>
-    INVOCATIONS.filter(inv => inv.moments.includes(DhikrMoment.FRIDAY_RECOMMENDED))
-    , []);
+  const vendrediInvocations = useMemo(
+    () =>
+      INVOCATIONS.filter((inv) =>
+        inv.moments.includes(DhikrMoment.FRIDAY_RECOMMENDED)
+      ),
+    []
+  );
 
   const setSingle = (key: string, val: number) => {
     setState((s) => ({ ...s, counts: { ...s.counts, [key]: val } }));
@@ -35,9 +37,10 @@ export default function Vendredi() {
       {invs.map((inv) => {
         if (inv.type === "triple") {
           const goals = getTripleGoals(inv, DhikrMoment.FRIDAY_RECOMMENDED);
-          const key = inv.momentGoals && inv.momentGoals[DhikrMoment.FRIDAY_RECOMMENDED]
-            ? makeKey(inv.id, DhikrMoment.FRIDAY_RECOMMENDED)
-            : inv.id;
+          const key =
+            inv.momentGoals && inv.momentGoals[DhikrMoment.FRIDAY_RECOMMENDED]
+              ? makeKey(inv.id, DhikrMoment.FRIDAY_RECOMMENDED)
+              : inv.id;
           const sub = (state.counts[key] as any)?.sub || {};
           return (
             <TripleInvocationCard
@@ -49,7 +52,7 @@ export default function Vendredi() {
             />
           );
         }
-        
+
         const key = inv.id;
         const value = (state.counts[key] as number) ?? 0;
         return (
@@ -59,9 +62,9 @@ export default function Vendredi() {
             value={value}
             setValue={(v) => setSingle(inv.id, v)}
             player={{
-              audioPath: inv?.audio as string ?? "",
-              vttPath: inv?.vtt as string ?? "",
-              words: inv.words as any ?? [],
+              audioPath: (inv?.audio as string) ?? "",
+              vttPath: (inv?.vtt as string) ?? "",
+              words: (inv.words as any) ?? [],
               translation: inv.translation,
             }}
           />
@@ -71,14 +74,16 @@ export default function Vendredi() {
   );
 
   const visibleItemsForOverall = useMemo(() => {
-    const pairs: Array<{ key: string; goalTotal: number; current: number }> = [];
+    const pairs: Array<{ key: string; goalTotal: number; current: number }> =
+      [];
 
     for (const inv of vendrediInvocations) {
       if (inv.type === "triple") {
         const goals = getTripleGoals(inv, DhikrMoment.FRIDAY_RECOMMENDED);
-        const key = inv.momentGoals && inv.momentGoals[DhikrMoment.FRIDAY_RECOMMENDED]
-          ? makeKey(inv.id, DhikrMoment.FRIDAY_RECOMMENDED)
-          : inv.id;
+        const key =
+          inv.momentGoals && inv.momentGoals[DhikrMoment.FRIDAY_RECOMMENDED]
+            ? makeKey(inv.id, DhikrMoment.FRIDAY_RECOMMENDED)
+            : inv.id;
         const sub = (state.counts[key] as any)?.sub || {};
         const goalTotal = Object.values(goals).reduce((a, n) => a + n, 0);
         const current = Object.keys(goals).reduce(
@@ -94,7 +99,8 @@ export default function Vendredi() {
       }
     }
 
-    let done = 0, total = 0;
+    let done = 0,
+      total = 0;
     for (const p of pairs) {
       done += Math.min(p.current, p.goalTotal);
       total += p.goalTotal;
@@ -114,7 +120,7 @@ export default function Vendredi() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-[20px] font-extrabold">Vendredi</h1>
-          
+
           <div className="ml-auto flex items-center gap-2">
             <Button
               size="sm"

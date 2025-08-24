@@ -1,15 +1,6 @@
 import type { Invocation } from "@/data/invocations";
 import { PrayerTime, DhikrMoment } from "@/data/invocations";
 
-export const slug = (s: string) =>
-  s
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
-
-export const makeKey = (id: string, moment?: PrayerTime | DhikrMoment) =>
-  moment ? `${id}::${slug(moment)}` : id;
-
 export function getTripleGoals(
   inv: Extract<Invocation, { type: "triple" }>,
   moment?: PrayerTime | DhikrMoment

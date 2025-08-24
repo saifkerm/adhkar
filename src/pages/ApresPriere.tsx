@@ -14,11 +14,12 @@ import {
 } from "@/data/invocations";
 import { useDailyState } from "@/hooks/useDailyState";
 import { currentPrayerLabel } from "@/utils/currentPrayer";
-import { getTripleGoals, makeKey } from "@/utils/tripleGoals";
+import { getTripleGoals } from "@/utils/tripleGoals";
 
 import { HeaderPrayers } from "@/components/HeaderPrayers";
 import InvocationCard from "@/components/InvocationCard";
 import { useSwipe } from "@/hooks/useSwipe";
+import { makeKey } from "@/utils/key";
 
 export default function ApresPriere() {
   const { state, setState, resetGlobal } = useDailyState(INVOCATIONS);
@@ -39,7 +40,7 @@ export default function ApresPriere() {
       {ids.map((id) => {
         const inv = INVOCATIONS.find((v) => v.id === id);
         if (!inv) return null;
-        
+
         if (inv.type === "triple") {
           const goals = getTripleGoals(inv, context);
           const key =
@@ -57,7 +58,7 @@ export default function ApresPriere() {
             />
           );
         }
-        
+
         const key = id;
         const value = (state.counts[key] as number) ?? 0;
         return (
@@ -67,9 +68,9 @@ export default function ApresPriere() {
             value={value}
             setValue={(v) => setSingle(id, v)}
             player={{
-              audioPath: inv?.audio as string ?? "",
-              vttPath: inv?.vtt as string ?? "",
-              words: inv.words as any ?? [],
+              audioPath: (inv?.audio as string) ?? "",
+              vttPath: (inv?.vtt as string) ?? "",
+              words: (inv.words as any) ?? [],
               translation: inv.translation,
             }}
           />
@@ -81,7 +82,8 @@ export default function ApresPriere() {
   const visibleItemsForOverall = useMemo(() => {
     const section = activePrayer;
     const ids = SECTION_CONFIGURATIONS[section] || [];
-    const pairs: Array<{ key: string; goalTotal: number; current: number }> = [];
+    const pairs: Array<{ key: string; goalTotal: number; current: number }> =
+      [];
 
     for (const id of ids) {
       const inv = INVOCATIONS.find((v) => v.id === id)!;
@@ -106,7 +108,8 @@ export default function ApresPriere() {
       }
     }
 
-    let done = 0, total = 0;
+    let done = 0,
+      total = 0;
     for (const p of pairs) {
       done += Math.min(p.current, p.goalTotal);
       total += p.goalTotal;
@@ -117,8 +120,9 @@ export default function ApresPriere() {
 
   const computePctForPrayer = (section: PrayerTime) => {
     const ids = SECTION_CONFIGURATIONS[section] || [];
-    let done = 0, total = 0;
-    
+    let done = 0,
+      total = 0;
+
     for (const id of ids) {
       const inv = INVOCATIONS.find((v) => v.id === id)!;
       if (inv.type === "triple") {
@@ -160,14 +164,14 @@ export default function ApresPriere() {
     <main className="min-h-dvh bg-background text-foreground sa-pb">
       <header className="sa-pt sticky top-0 z-20 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="sa-px mx-auto flex max-w-screen-md flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-[20px] font-extrabold">Après la prière</h1>
-          
+
           <div className="ml-auto flex items-center gap-2">
             <Button
               size="sm"
@@ -206,10 +210,7 @@ export default function ApresPriere() {
         ref={swipeRef}
         className="mx-auto mt-4 max-w-screen-md px-3 pb-8"
       >
-        {renderGrid(
-          SECTION_CONFIGURATIONS[activePrayer] || [],
-          activePrayer
-        )}
+        {renderGrid(SECTION_CONFIGURATIONS[activePrayer] || [], activePrayer)}
       </section>
     </main>
   );

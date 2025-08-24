@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Invocation } from "@/data/invocations";
+import { makeKey } from "@/utils/key";
 
 type Counts =
   | number
@@ -14,15 +15,6 @@ type State = {
 
 const STORAGE_KEY = "adhkar.v1";
 const todayKey = () => new Date().toISOString().slice(0, 10);
-
-const slug = (s: string) =>
-  s
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
-
-export const makeKey = (id: string, moment?: string) =>
-  moment ? `${id}::${slug(moment)}` : id;
 
 export function defaultState(invocations: Invocation[]): State {
   const base: State = { date: todayKey(), counts: {} };
