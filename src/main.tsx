@@ -1,13 +1,17 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import App from "./App";
 import "./index.css";
 
-// Import des pages
-import App from "./App";
-
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    {/* Un seul Router, avec le basename pour GitHub Pages */}
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Routes>
+        {/* La route parente capture tous les sous-chemins */}
+        <Route path="/*" element={<App />} />
+      </Routes>
+    </BrowserRouter>
+  </React.StrictMode>
 );
