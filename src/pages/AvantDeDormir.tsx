@@ -1,16 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { TripleInvocationCard } from "@/components/TripleInvocationCard";
 import { DhikrMoment, INVOCATIONS } from "@/data/invocations";
-import { getTripleGoals } from "@/utils/tripleGoals";
 
-import InvocationCard from "@/components/InvocationCard";
-import { makeKey } from "@/utils/key";
+import { InvocationGrid } from "@/components/InvocationGrid";
 import { useInvocationState } from "@/hooks/useInvocationState";
 import { useInvocationsByMoment } from "@/hooks/useInvocationsByMoment";
 import { useProgress } from "@/hooks/useProgress";
+import { DhikrPageLayout } from "@/layout/DhikrPageLayout";
 
 export default function AvantDeDormir() {
   const { state, setSingle, setTriple, resetGlobal } =
@@ -27,90 +21,22 @@ export default function AvantDeDormir() {
     DhikrMoment.BEFORE_SLEEP
   );
 
-  const renderGrid = (invs: typeof INVOCATIONS) => (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-1">
-      {invs.map((inv) => {
-        if (inv.type === "triple") {
-          const goals = getTripleGoals(inv, DhikrMoment.BEFORE_SLEEP);
-          const key =
-            inv.momentGoals && inv.momentGoals[DhikrMoment.BEFORE_SLEEP]
-              ? makeKey(inv.id, DhikrMoment.BEFORE_SLEEP)
-              : inv.id;
-          const sub = (state.counts[key] as any)?.sub || {};
-          return (
-            <TripleInvocationCard
-              key={key}
-              inv={inv}
-              sub={sub}
-              goals={goals}
-              setSub={(next) => setTriple(key, next)}
-            />
-          );
-        }
-
-        const key = inv.id;
-        const value = (state.counts[key] as number) ?? 0;
-        return (
-          <InvocationCard
-            key={key}
-            inv={inv}
-            value={value}
-            setValue={(v) => setSingle(inv.id, v)}
-            player={{
-              audioPath: (inv?.audio as string) ?? "",
-              vttPath: (inv?.vtt as string) ?? "",
-              words: (inv.words as any) ?? [],
-              translation: inv.translation,
-            }}
-          />
-        );
-      })}
-    </div>
-  );
-
   return (
-    <main className="min-h-dvh bg-background text-foreground sa-pb">
-      <header className="sa-pt sticky top-0 z-20 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="sa-px mx-auto flex max-w-screen-md flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-[20px] font-extrabold">Avant de dormir</h1>
-
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="destructive"
-              className="h-9 rounded-lg px-3 whitespace-nowrap"
-              onClick={resetGlobal}
-            >
-              <span className="inline sm:hidden">Réinit.</span>
-              <span className="hidden sm:inline">Réinit. global</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <section className="mx-auto mt-2 max-w-screen-md px-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <span className="w-fit rounded-full border px-2.5 py-1 text-[12px] text-muted-foreground">
-            Progression
-          </span>
-          <div className="sm:flex-1">
-            <Progress value={pct} className="h-3" />
-          </div>
-          <span className="w-fit rounded-full border px-2.5 py-1 text-[12px] font-bold">
-            {pct}%
-          </span>
-        </div>
-      </section>
-
+    <DhikrPageLayout
+      title="Avant de dormir"
+      progressPct={pct}
+      resetGlobal={resetGlobal}
+    >
       <section className="mx-auto mt-4 max-w-screen-md px-3 pb-8">
-        {renderGrid(sommeilInvocations)}
+        {
+          <InvocationGrid
+            invocations={sommeilInvocations}
+            state={state}
+            setSingle={setSingle}
+            setTriple={setTriple}
+          />
+        }
       </section>
-    </main>
+    </DhikrPageLayout>
   );
 }

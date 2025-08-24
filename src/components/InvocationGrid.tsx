@@ -1,10 +1,10 @@
-import type { FC } from "react";
-import type { Invocation, DhikrMoment, PrayerTime } from "@/data/invocations";
-import { getTripleGoals } from "@/utils/tripleGoals";
-import { makeKey } from "@/utils/key";
 import InvocationCard from "@/components/InvocationCard";
 import { TripleInvocationCard } from "@/components/TripleInvocationCard";
+import type { DhikrMoment, Invocation, PrayerTime } from "@/data/invocations";
 import type { State } from "@/hooks/useDailyState";
+import { makeKey } from "@/utils/key";
+import { getTripleGoals } from "@/utils/tripleGoals";
+import type { FC } from "react";
 
 interface Props {
   invocations: Invocation[];
@@ -26,7 +26,7 @@ export const InvocationGrid: FC<Props> = ({
   setTriple,
 }) => {
   return (
-    <>
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-1">
       {invocations.map((inv) => {
         if (inv.type === "triple") {
           const goals = getTripleGoals(inv, moment);
@@ -62,6 +62,6 @@ export const InvocationGrid: FC<Props> = ({
           />
         );
       })}
-    </>
+    </div>
   );
 };
