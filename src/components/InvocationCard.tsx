@@ -25,7 +25,12 @@ type Props = {
   player?: PlayerProps; // si fourni => lecture mot-à-mot
 };
 
-export default function InvocationCard({ inv, value, setValue, player }: Props) {
+export default function InvocationCard({
+  inv,
+  value,
+  setValue,
+  player,
+}: Props) {
   const [open, setOpen] = useState(false);
   const goal = typeof inv.goal === "number" ? inv.goal : null;
   const pct = goal ? Math.min(100, Math.round((value / goal) * 100)) : 0;
@@ -56,7 +61,9 @@ export default function InvocationCard({ inv, value, setValue, player }: Props) 
           </span>
 
           <ChevronDown
-            className={`ml-1 h-4 w-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+            className={`ml-1 h-4 w-4 shrink-0 transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
           />
         </button>
       </CardHeader>
@@ -76,10 +83,12 @@ export default function InvocationCard({ inv, value, setValue, player }: Props) 
             />
           ) : (
             <div className="rounded-xl border border-border/60 p-4 text-center">
-              <p dir="rtl" className="text-3xl font-extrabold leading-relaxed">
+              <p dir="rtl" className="text-md font-extrabold leading-relaxed">
                 {inv.transcription}
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">{inv.translation}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {inv.translation}
+              </p>
             </div>
           )}
 
@@ -113,7 +122,10 @@ export default function InvocationCard({ inv, value, setValue, player }: Props) 
 
           {/* Actions minimales */}
           <div className="flex items-center gap-2">
-            <Button className="h-12 flex-1 text-base font-extrabold" onClick={bump}>
+            <Button
+              className="h-12 flex-1 text-base font-extrabold"
+              onClick={bump}
+            >
               +1
             </Button>
             <Button

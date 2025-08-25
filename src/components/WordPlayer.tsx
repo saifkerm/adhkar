@@ -18,7 +18,7 @@ type Props = {
 const toPublicUrl = (p?: string) => {
   if (!p) return "";
   if (/^(?:https?:)?\/\//i.test(p) || /^blob:|^data:/i.test(p)) return p;
-  const base = (import.meta.env?.BASE_URL ?? "/"); // "/" en dev, "/adhkar/" en prod
+  const base = import.meta.env?.BASE_URL ?? "/"; // "/" en dev, "/adhkar/" en prod
   const left = base.replace(/\/+$/g, "");
   const right = p.replace(/^\.?\//, "");
   return `${left}/${right}`.replace(/\/{2,}/g, "/");
@@ -46,9 +46,11 @@ export default function WordPlayer({
 
   useEffect(() => {
     if (!vttUrl) return;
-    loadVtt(vttUrl).then(setCues).catch((e) => {
-      console.error("VTT load error:", e, vttUrl);
-    });
+    loadVtt(vttUrl)
+      .then(setCues)
+      .catch((e) => {
+        console.error("VTT load error:", e, vttUrl);
+      });
   }, [vttUrl]);
 
   useEffect(() => {
@@ -86,7 +88,9 @@ export default function WordPlayer({
     const onEnded = () => setPlaying(false);
     const onError = () => {
       // code 2 = MEDIA_ERR_NETWORK (souvent 404). Ouvre l’URL dans l’onglet pour vérifier si besoin.
-      console.error("Audio error",a.error, a.error?.code ?? "unknown", { src: a.currentSrc });
+      console.error("Audio error", a.error, a.error?.code ?? "unknown", {
+        src: a.currentSrc,
+      });
     };
     a.addEventListener("ended", onEnded);
     a.addEventListener("error", onError);
@@ -114,10 +118,22 @@ export default function WordPlayer({
 
   useEffect(() => {
     if (!center) return;
-    const ar = document.querySelector<HTMLElement>(`.ar [data-idx="${active}"]`);
-    const tr = document.querySelector<HTMLElement>(`.tr [data-idx="${active}"]`);
-    ar?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    tr?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const ar = document.querySelector<HTMLElement>(
+      `.ar [data-idx="${active}"]`
+    );
+    const tr = document.querySelector<HTMLElement>(
+      `.tr [data-idx="${active}"]`
+    );
+    ar?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+    tr?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
   }, [active, center]);
 
   const playPause = async () => {
@@ -148,9 +164,15 @@ export default function WordPlayer({
     return () => window.removeEventListener("keydown", onKey);
   }, [audioUrl, playPause, playing]);
 
-  const frWords = useMemo(() => (translation ? translation.split(/\s+/) : []), [translation]);
+  const frWords = useMemo(
+    () => (translation ? translation.split(/\s+/) : []),
+    [translation]
+  );
   const frIdx = translation
-    ? Math.min(frWords.length - 1, Math.round((active / Math.max(1, total - 1)) * (frWords.length - 1)))
+    ? Math.min(
+        frWords.length - 1,
+        Math.round((active / Math.max(1, total - 1)) * (frWords.length - 1))
+      )
     : -1;
 
   const hasAudio = !!audioUrl;
@@ -182,23 +204,37 @@ export default function WordPlayer({
             <option value="1.5">1.5×</option>
           </select>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input type="checkbox" checked={center} onChange={(e) => setCenter(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={center}
+              onChange={(e) => setCenter(e.target.checked)}
+            />
             Centrer
           </label>
         </div>
       </div>
 
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full border border-border">
-        <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
+        <div
+          className="h-full bg-primary"
+          style={{ width: `${progressPct}%` }}
+        />
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-dashed border-border p-2 ar">
-        <div dir="rtl" className="flex items-center gap-1 text-3xl md:text-4xl font-extrabold min-w-max">
+      {/* Section arabe avec taille réduite */}
+      <div className="mt-4 rounded-xl border border-dashed border-border p-2 ar">
+        <div
+          dir="rtl"
+          // on passe de text-3xl à text-xl et md:text-2xl
+          className="flex flex-col gap-1 text-sm md:text-sm font-extrabold"
+        >
           {words.map((w) => (
             <button
               key={w.i}
               data-idx={w.i}
-              className={`px-1 rounded whitespace-nowrap flex-shrink-0 ${active === w.i ? "bg-primary text-primary-foreground" : ""}`}
+              className={`px-1 py-1 rounded text-right ${
+                active === w.i ? "bg-primary text-primary-foreground" : ""
+              }`}
               onClick={() => seekTo(w.i)}
             >
               {w.ar}
@@ -207,13 +243,19 @@ export default function WordPlayer({
         </div>
       </div>
 
-      <div className="mt-2 overflow-x-auto rounded-xl border border-dashed border-border p-2 tr">
-        <div className="flex items-center gap-1 text-xl font-semibold min-w-max">
+      {/* Section translittération avec taille réduite */}
+      <div className="mt-2 rounded-xl border border-dashed border-border p-2 tr">
+        <div
+          // de text-xl à text-base et md:text-lg
+          className="flex flex-col gap-1 text-sm md:text-sm font-semibold"
+        >
           {words.map((w) => (
             <button
               key={w.i}
               data-idx={w.i}
-              className={`px-1 rounded whitespace-nowrap flex-shrink-0 ${active === w.i ? "bg-primary text-primary-foreground" : ""}`}
+              className={`px-1 py-1 rounded text-left ${
+                active === w.i ? "bg-primary text-primary-foreground" : ""
+              }`}
               onClick={() => seekTo(w.i)}
             >
               {w.tr ?? ""}

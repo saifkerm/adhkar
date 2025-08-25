@@ -1,138 +1,250 @@
+"use client";
+
+import { useState, useEffect, useMemo, useRef } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DhikrPageLayout } from "@/layout/DhikrPageLayout";
 import {
-  AlertCircle,
-  Bug,
-  CheckCircle,
-  Compass,
-  RotateCw,
+  MapPin,
+  Navigation,
+  Compass as CompassIcon,
+  Loader2,
   Settings2,
+  RotateCw,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
-import { motion } from "motion/react"; // Motion One
-import { useEffect, useMemo, useRef, useState } from "react";
 
-// ───────────────────────────────────────────────────────────────────────────────
-// Constantes & Utils
-// ───────────────────────────────────────────────────────────────────────────────
-const KAABA_LAT = 21.422487;
-const KAABA_LON = 39.826206;
-const EARTH_RADIUS_KM = 6371;
-
-const degToRad = (deg: number) => (deg * Math.PI) / 180;
-const radToDeg = (rad: number) => (rad * 180) / Math.PI;
-
-// Haversine distance (km)
-function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const dLat = degToRad(lat2 - lat1);
-  const dLon = degToRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(degToRad(lat1)) *
-      Math.cos(degToRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return EARTH_RADIUS_KM * c;
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+interface CompassData {
+  qiblaDirection: number;
+  userHeading: number;
+  distance: number;
+  city?: string;
 }
 
-// Azimut vers la Kaaba (0–360° depuis le nord)
-function getQiblaBearing(lat: number, lon: number) {
-  const lat1 = degToRad(lat);
-  const lon1 = degToRad(lon);
-  const lat2 = degToRad(KAABA_LAT);
-  const lon2 = degToRad(KAABA_LON);
-  const dLon = lon2 - lon1;
-  const x = Math.sin(dLon);
-  const y = Math.cos(lat1) * Math.tan(lat2) - Math.sin(lat1) * Math.cos(dLon);
-  let brng = radToDeg(Math.atan2(x, y));
-  brng = (brng + 360) % 360;
-  return brng;
-}
-
-// alpha/beta/gamma -> heading (° depuis le nord)
-function computeCompassHeading(alpha: number, beta: number, gamma: number) {
-  const degtorad = Math.PI / 180;
-  const _x = beta * degtorad;
-  const _y = gamma * degtorad;
-  const _z = alpha * degtorad;
-  const cX = Math.cos(_x);
-  const cY = Math.cos(_y);
-  const cZ = Math.cos(_z);
-  const sX = Math.sin(_x);
-  const sY = Math.sin(_y);
-  const sZ = Math.sin(_z);
-  const Vx = -cZ * sY - sZ * sX * cY;
-  const Vy = -sZ * sY + cZ * sX * cY;
-  let heading = Math.atan(Vx / Vy);
-  if (Vy < 0) heading += Math.PI;
-  else if (Vx < 0) heading += 2 * Math.PI;
-  return radToDeg(heading);
-}
-
-// moyenne circulaire d’un tableau d’angles (deg)
-function circularMean(angles: number[]) {
+// ───────── Utils angle (circulaire) ─────────
+const toRad = (d: number) => (d * Math.PI) / 180;
+const toDeg = (r: number) => (r * 180) / Math.PI;
+const norm360 = (x: number) => ((x % 360) + 360) % 360;
+const angDiff = (a: number, b: number) => ((b - a + 540) % 360) - 180;
+const circularMean = (angles: number[]) => {
   if (!angles.length) return 0;
-  const sum = angles.reduce(
-    (acc, a) => {
-      const r = degToRad(a);
-      acc.x += Math.cos(r);
-      acc.y += Math.sin(r);
-      return acc;
-    },
-    { x: 0, y: 0 },
+  let sx = 0,
+    sy = 0;
+  for (const a of angles) {
+    const r = toRad(a);
+    sx += Math.cos(r);
+    sy += Math.sin(r);
+  }
+  return norm360(toDeg(Math.atan2(sy, sx)));
+};
+const circularLerp = (from: number, to: number, t: number) =>
+  norm360(from + angDiff(from, to) * t);
+
+export default function QiblaCompass() {
+  // état principal
+  const [location, setLocation] = useState<Location | null>(null);
+  const [compassData, setCompassData] = useState<CompassData | null>(null);
+
+  // heading capteur (filtré mais SANS offset), puis heading ajusté (AVEC offset)
+  const [sensorHeading, setSensorHeading] = useState<number>(0); // 0..360
+  const [headingOffset, setHeadingOffset] = useState<number>(() =>
+    Number(localStorage.getItem("qbl_off") ?? 0)
   );
-  const mean = Math.atan2(sum.y / angles.length, sum.x / angles.length);
-  const deg = (radToDeg(mean) + 360) % 360;
-  return deg;
-}
-
-// diff la plus courte (signed, -180..180)
-function shortestDiff(a: number, b: number) {
-  return ((b - a + 540) % 360) - 180;
-}
-
-function supportsVibrate() {
-  return typeof navigator !== "undefined" && "vibrate" in navigator;
-}
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handler = () => setReduced(!!mq.matches);
-    handler();
-    mq.addEventListener?.("change", handler);
-    return () => mq.removeEventListener?.("change", handler);
-  }, []);
-  return reduced;
-}
-
-// ───────────────────────────────────────────────────────────────────────────────
-// Composant principal
-// ───────────────────────────────────────────────────────────────────────────────
-export default function Qibla() {
-  // Position / capteur
-  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
-    null,
+  const adjustedHeading = useMemo(
+    () => norm360(sensorHeading + headingOffset),
+    [sensorHeading, headingOffset]
   );
-  const [headingRaw, setHeadingRaw] = useState<number | null>(null); // brut
-  const [orientationStatus, setOrientationStatus] = useState<
-    "unknown" | "granted" | "denied"
-  >("unknown");
+
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
 
-  // Réglages utilisateur (persistés)
-  const [tolerance, setTolerance] = useState<number>(() => {
-    const v = localStorage.getItem("qbl_tol");
-    return v ? Number(v) : 5; // ±5° par défaut
-  });
-  const [smoothWindow, setSmoothWindow] = useState<number>(() => {
-    const v = localStorage.getItem("qbl_smooth");
-    return v ? Number(v) : 5; // 5 dernières mesures
-  });
-  const [showDebug, setShowDebug] = useState<boolean>(() => {
-    return localStorage.getItem("qbl_debug") === "1";
-  });
+  // réglages de stabilité
+  const [tolerance, setTolerance] = useState<number>(() =>
+    Number(localStorage.getItem("qbl_tol") ?? 5)
+  );
+  const [smoothWindow, setSmoothWindow] = useState<number>(() =>
+    Number(localStorage.getItem("qbl_smooth") ?? 8)
+  );
+  const [deadband, setDeadband] = useState<number>(() =>
+    Number(localStorage.getItem("qbl_dead") ?? 1)
+  );
+  const [altFormula, setAltFormula] = useState<boolean>(
+    () => localStorage.getItem("qbl_alt") === "1"
+  );
 
+  // buffers / refs
+  const rawBufRef = useRef<number[]>([]);
+  const filteredHeadingRef = useRef<number>(0);
+  const prevAlignedRef = useRef(false);
+
+  // animations
+  const needleControls = useAnimation();
+  const cardControls = useAnimation();
+
+  // constantes Kaaba
+  const KAABA_LAT = 21.422487;
+  const KAABA_LNG = 39.826206;
+
+  // Bearing + distance
+  const calculateBearing = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ) => {
+    const dLng = toRad(lng2 - lng1);
+    const lat1r = toRad(lat1);
+    const lat2r = toRad(lat2);
+    const y = Math.sin(dLng) * Math.cos(lat2r);
+    const x =
+      Math.cos(lat1r) * Math.sin(lat2r) -
+      Math.sin(lat1r) * Math.cos(lat2r) * Math.cos(dLng);
+    return norm360(toDeg(Math.atan2(y, x)));
+  };
+  const calculateDistance = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ) => {
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // orientation d’écran (0/90/180/270)
+  const getScreenAngle = () => {
+    const a = (window.screen?.orientation as any)?.angle;
+    if (typeof a === "number") return a;
+    const w = (window as any).orientation;
+    if (typeof w === "number") return w;
+    return 0;
+  };
+
+  // iOS: webkitCompassHeading ; Android: alpha ; altFormula permet de switcher la convention si besoin
+  const computeRawHeading = (ev: DeviceOrientationEvent) => {
+    const wkh = (ev as any).webkitCompassHeading;
+    if (typeof wkh === "number" && !Number.isNaN(wkh)) return norm360(wkh); // iOS (souvent vrai nord)
+    if (ev.alpha == null) return null;
+    const scr = getScreenAngle();
+    // Deux conventions qu'on rencontre dans la nature :
+    //  - (A) 360 - alpha + screenAngle
+    //  - (B) alpha + screenAngle
+    const h = altFormula ? ev.alpha + scr : 360 - ev.alpha + scr;
+    return norm360(h);
+  };
+
+  // localisation
+  const getUserLocation = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!navigator.geolocation)
+        throw new Error("Geolocation is not supported by this browser");
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        })
+      );
+      const loc = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      };
+      setLocation(loc);
+      const qibla = calculateBearing(
+        loc.latitude,
+        loc.longitude,
+        KAABA_LAT,
+        KAABA_LNG
+      );
+      const dist = calculateDistance(
+        loc.latitude,
+        loc.longitude,
+        KAABA_LAT,
+        KAABA_LNG
+      );
+      setCompassData({ qiblaDirection: qibla, userHeading: 0, distance: dist });
+      cardControls.start({
+        scale: [0.8, 1.06, 1],
+        opacity: [0, 1],
+        transition: { duration: 0.6, ease: "easeOut" },
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to get location");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // permission capteur
+  const requestOrientationPermission = async () => {
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      "requestPermission" in DeviceOrientationEvent
+    ) {
+      try {
+        setPermissionGranted(
+          (await (DeviceOrientationEvent as any).requestPermission()) ===
+            "granted"
+        );
+      } catch {
+        setPermissionGranted(false);
+      }
+    } else {
+      setPermissionGranted(true);
+    }
+  };
+
+  // cap + lissage circulaire + deadband + passe-bas
+  useEffect(() => {
+    if (!permissionGranted) return;
+    const onOrient = (ev: DeviceOrientationEvent) => {
+      const h0 = computeRawHeading(ev);
+      if (h0 == null) return;
+
+      const win = Math.max(1, Math.min(60, smoothWindow));
+      const buf = rawBufRef.current;
+      buf.push(h0);
+      if (buf.length > win) buf.shift();
+      const mean = circularMean(buf);
+
+      const prevF = filteredHeadingRef.current;
+      if (Math.abs(angDiff(prevF, mean)) < deadband) return;
+
+      const ALPHA = 0.15;
+      const filtered = circularLerp(prevF, mean, ALPHA);
+      filteredHeadingRef.current = filtered;
+      setSensorHeading(filtered);
+      setCompassData((prev) =>
+        prev ? { ...prev, userHeading: filtered } : prev
+      );
+    };
+    window.addEventListener("deviceorientationabsolute", onOrient as any, true);
+    window.addEventListener("deviceorientation", onOrient as any, true);
+    return () => {
+      window.removeEventListener(
+        "deviceorientationabsolute",
+        onOrient as any,
+        true
+      );
+      window.removeEventListener("deviceorientation", onOrient as any, true);
+    };
+  }, [permissionGranted, smoothWindow, deadband, altFormula]);
+
+  // persistance réglages
   useEffect(() => {
     localStorage.setItem("qbl_tol", String(tolerance));
   }, [tolerance]);
@@ -140,375 +252,426 @@ export default function Qibla() {
     localStorage.setItem("qbl_smooth", String(smoothWindow));
   }, [smoothWindow]);
   useEffect(() => {
-    localStorage.setItem("qbl_debug", showDebug ? "1" : "0");
-  }, [showDebug]);
-
-  // Géolocalisation
+    localStorage.setItem("qbl_dead", String(deadband));
+  }, [deadband]);
   useEffect(() => {
-    if (
-      navigator.geolocation &&
-      typeof navigator.geolocation.watchPosition === "function"
-    ) {
-      const id = navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoords({ lat: latitude, lon: longitude });
-        },
-        () => {
-          setError(
-            "Impossible de déterminer votre position. La direction sera approximative.",
-          );
-          setCoords({ lat: 48.8566, lon: 2.3522 }); // Paris fallback
-        },
-        { enableHighAccuracy: true, maximumAge: 30000 },
-      );
-      return () => {
-        if (navigator.geolocation.clearWatch) {
-          navigator.geolocation.clearWatch(id);
-        }
-      };
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoords({ lat: latitude, lon: longitude });
-        },
-        () => {
-          setError(
-            "Impossible de déterminer votre position. La direction sera approximative.",
-          );
-          setCoords({ lat: 48.8566, lon: 2.3522 });
-        },
-      );
-    }
-  }, []);
-
-  // Capteur orientation (après permission)
-  const rawBufferRef = useRef<number[]>([]);
-  const reducedMotion = usePrefersReducedMotion();
+    localStorage.setItem("qbl_off", String(headingOffset));
+  }, [headingOffset]);
   useEffect(() => {
-    if (orientationStatus !== "granted") return;
+    localStorage.setItem("qbl_alt", altFormula ? "1" : "0");
+  }, [altFormula]);
 
-    function handleOrientation(event: DeviceOrientationEvent) {
-      let current: number | null = null;
-      // iOS
-      const iosHeading = (event as any).webkitCompassHeading;
-      if (typeof iosHeading === "number") {
-        current = iosHeading;
-      } else if (
-        event.alpha != null &&
-        event.beta != null &&
-        event.gamma != null
-      ) {
-        current = computeCompassHeading(event.alpha, event.beta, event.gamma);
-      }
-      if (current != null) {
-        // buffer pour smoothing
-        const buf = rawBufferRef.current;
-        buf.push((current + 360) % 360);
-        if (buf.length > Math.max(1, smoothWindow)) buf.shift();
-        setHeadingRaw(circularMean(buf));
-      }
-    }
+  // angle relatif (aiguille = Qibla - cap ajusté)
+  const relativeAngle = useMemo(() => {
+    if (!compassData) return 0;
+    return norm360(compassData.qiblaDirection - adjustedHeading);
+  }, [compassData, adjustedHeading]);
 
-    window.addEventListener("deviceorientation", handleOrientation);
-    return () => {
-      window.removeEventListener("deviceorientation", handleOrientation);
-      rawBufferRef.current = [];
-    };
-  }, [orientationStatus, smoothWindow]);
+  const deltaDeg = useMemo(
+    () => Math.min(relativeAngle, 360 - relativeAngle),
+    [relativeAngle]
+  );
+  const aligned = deltaDeg <= tolerance;
 
-  // Demander permission (iOS)
-  const requestOrientationPermission = () => {
-    if (
-      typeof DeviceOrientationEvent !== "undefined" &&
-      typeof (DeviceOrientationEvent as any).requestPermission === "function"
-    ) {
-      (DeviceOrientationEvent as any)
-        .requestPermission()
-        .then((res: string) => {
-          if (res === "granted") {
-            setOrientationStatus("granted");
-            setError(null);
-          } else {
-            setOrientationStatus("denied");
-            setError(
-              "Vous avez refusé l’accès au capteur d’orientation. L’aiguille restera fixe.",
-            );
-          }
-        })
-        .catch(() => {
-          setOrientationStatus("denied");
-          setError(
-            "Le capteur d’orientation n’est pas disponible sur cet appareil.",
-          );
-        });
-    } else {
-      setOrientationStatus("granted"); // Android / Desktop
-    }
-  };
-
-  // Calculs affichés
-  const qiblaBearing = useMemo(() => {
-    if (!coords) return 0;
-    return getQiblaBearing(coords.lat, coords.lon);
-  }, [coords]);
-
-  const distanceKm = useMemo(() => {
-    if (!coords) return null;
-    return getDistanceKm(coords.lat, coords.lon, KAABA_LAT, KAABA_LON);
-  }, [coords]);
-
-  const relativeAngle =
-    headingRaw != null && orientationStatus === "granted"
-      ? (qiblaBearing - headingRaw + 360) % 360
-      : qiblaBearing;
-
-  const aligned = relativeAngle < tolerance || relativeAngle > 360 - tolerance;
-
-  // Haptique : vibre quand on ENTRE dans l’état aligné
-  const prevAlignedRef = useRef<boolean>(false);
+  // vibration à l’entrée dans l’état aligné
   useEffect(() => {
-    if (aligned && !prevAlignedRef.current && supportsVibrate()) {
+    if (aligned && !prevAlignedRef.current && "vibrate" in navigator)
       navigator.vibrate?.(20);
-    }
     prevAlignedRef.current = aligned;
   }, [aligned]);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // UI
-  // ────────────────────────────────────────────────────────────────────────────
+  // aiguille : tween sans rebond
+  useEffect(() => {
+    const target = ((relativeAngle + 540) % 360) - 180;
+    needleControls.start({
+      rotate: target,
+      transition: { type: "tween", ease: "easeOut", duration: 0.14 },
+    });
+  }, [relativeAngle, needleControls]);
+
+  // fond dynamique si aligné
+  const bgClass = aligned
+    ? "bg-green-50 dark:bg-green-950"
+    : "bg-gradient-to-br from-background via-muted/30 to-background";
+
+  // motif décoratif
+  const IslamicPattern = () => (
+    <svg
+      className="absolute inset-0 w-full h-full opacity-10"
+      viewBox="0 0 200 200"
+    >
+      <defs>
+        <pattern
+          id="islamicPattern"
+          x="0"
+          y="0"
+          width="40"
+          height="40"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M20,0 L30,10 L20,20 L10,10 Z M0,20 L10,30 L0,40 L-10,30 Z M40,20 L50,30 L40,40 L30,30 Z M20,40 L30,50 L20,60 L10,50 Z"
+            fill="currentColor"
+            className="text-primary"
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#islamicPattern)" />
+    </svg>
+  );
+
+  // action: caler offset pour que l’aiguille soit pile sur la Kaaba maintenant
+  const calibrateToQiblaNow = () => {
+    if (!compassData) return;
+    // On veut relativeAngle = 0 => adjustedHeading doit devenir qibla
+    // adjustedHeading = sensorHeading + offset => offset = qibla - sensorHeading
+    const needed = angDiff(0, compassData.qiblaDirection - adjustedHeading); // = -relativeAngle (signé)
+    setHeadingOffset((prev) => {
+      const next = prev + needed;
+      // garder un offset lisible (-180..180)
+      const wrapped = ((next + 180) % 360) - 180;
+      return wrapped;
+    });
+  };
+
   return (
-    <DhikrPageLayout title="Direction de la Qibla" progressPct={0}>
-      {/* Zone live pour lecteurs d'écran */}
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-500 ${bgClass}`}
+    >
+      {/* accessibilité */}
       <div className="sr-only" aria-live="polite">
         {aligned
           ? "Alignement parfait vers la Qibla."
-          : `Écart de ${Math.round(
-              Math.min(relativeAngle, 360 - relativeAngle),
-            )} degrés.`}
+          : `Écart de ${Math.round(deltaDeg)} degrés.`}
       </div>
 
-      <div className="flex flex-col items-center gap-6 py-6">
-        {/* Cadran */}
-        <div className="relative w-72 h-72 rounded-full border-4 border-muted flex items-center justify-center">
-          {/* Anneau + cardinal points */}
-          <svg
-            viewBox="0 0 100 100"
-            className="absolute inset-0 w-full h-full text-muted-foreground/80"
-          >
-            <defs>
-              {/* Arc d’écart (en dessous) */}
-              <linearGradient id="delta" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="hsl(221 83% 53%)" />
-                <stop offset="100%" stopColor="hsl(142 72% 45%)" />
-              </linearGradient>
-            </defs>
-            <circle
-              cx="50"
-              cy="50"
-              r="48"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
-            />
-            {/* Cardinal points visibles en dark */}
-            <text x="50" y="12" textAnchor="middle" fontSize="8">
-              N
-            </text>
-            <text x="50" y="96" textAnchor="middle" fontSize="8">
-              S
-            </text>
-            <text x="92" y="54" textAnchor="middle" fontSize="8">
-              E
-            </text>
-            <text x="8" y="54" textAnchor="middle" fontSize="8">
-              O
-            </text>
-
-            {/* Arc d’écart (de 0 vers relativeAngle, côté le plus court) */}
-            {(() => {
-              const delta = Math.min(relativeAngle, 360 - relativeAngle);
-              const start = -90; // haut
-              const end = start + (relativeAngle <= 180 ? delta : -delta);
-              const a1 = (Math.PI / 180) * start;
-              const a2 = (Math.PI / 180) * end;
-              const r = 42;
-              const p1 = {
-                x: 50 + r * Math.cos(a1),
-                y: 50 + r * Math.sin(a1),
-              };
-              const p2 = {
-                x: 50 + r * Math.cos(a2),
-                y: 50 + r * Math.sin(a2),
-              };
-              const large = 0;
-              const sweep = relativeAngle <= 180 ? 1 : 0;
-              const d = `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} ${sweep} ${p2.x} ${p2.y}`;
-              return (
-                <path d={d} stroke="url(#delta)" strokeWidth="6" fill="none" />
-              );
-            })()}
-          </svg>
-
-          {/* Halo animé si aligné */}
-          <motion.div
-            className="absolute w-56 h-56 rounded-full"
-            style={{ boxShadow: "0 0 0 0 rgba(34,197,94,0.0)" }}
-            animate={
-              aligned
-                ? {
-                    boxShadow: [
-                      "0 0 0 0 rgba(34,197,94,0.0)",
-                      "0 0 0 12px rgba(34,197,94,0.20)",
-                      "0 0 0 0 rgba(34,197,94,0.0)",
-                    ],
-                  }
-                : { boxShadow: "0 0 0 0 rgba(34,197,94,0.0)" }
-            }
-            transition={
-              aligned
-                ? { duration: 1.2, repeat: Infinity, easing: "ease-in-out" }
-                : { duration: 0.2 }
-            }
-          />
-
-          {/* Aiguille animée */}
-          <motion.div
-            animate={{
-              rotate: relativeAngle,
-              scale: aligned ? 1.08 : 1,
-            }}
-            transition={
-              reducedMotion
-                ? { duration: 0 } // respect prefers-reduced-motion
-                : { type: "spring", stiffness: 220, damping: 26 }
-            }
-            className="absolute top-1/2 left-1/2 origin-bottom"
-            style={{ translate: "-50% -100%" }}
-          >
-            <div
-              className={`w-1 h-32 rounded-b-full shadow-md ${
-                aligned ? "bg-green-500" : "bg-primary"
-              }`}
-            />
-            <div
-              className={`w-5 h-5 rounded-full -mt-2 ${
-                aligned ? "bg-green-500" : "bg-primary"
-              }`}
-            />
-          </motion.div>
-        </div>
-
-        {/* Message alignement */}
-        <div
-          className={`flex items-center gap-2 text-sm ${
-            aligned ? "text-green-500" : "text-muted-foreground"
-          }`}
+      <div className="w-full max-w-md space-y-6">
+        {/* header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center space-y-2"
         >
-          {aligned ? <CheckCircle size={16} /> : <Compass size={16} />}
-          {aligned
-            ? "Vous êtes bien orienté·e vers la Qibla"
-            : `Écart : ${Math.round(
-                Math.min(relativeAngle, 360 - relativeAngle),
-              )}°`}
-        </div>
-
-        {/* Infos distance / azimut */}
-        {distanceKm !== null && (
+          <h1 className="text-3xl font-bold text-foreground">بوصلة القبلة</h1>
+          <p className="text-lg text-muted-foreground">Qibla Compass</p>
           <p className="text-sm text-muted-foreground">
-            Distance : {distanceKm.toFixed(0)} km • Azimut :{" "}
-            {qiblaBearing.toFixed(0)}°
+            Find the direction to the Holy Kaaba
           </p>
-        )}
+        </motion.div>
 
-        {/* Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {orientationStatus === "unknown" && (
-            <Button
-              onClick={requestOrientationPermission}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Compass className="h-4 w-4" />
-              Activer la boussole
-            </Button>
-          )}
+        {/* carte */}
+        <Card className="relative overflow-hidden bg-card/80 backdrop-blur-sm border-2 border-primary/20">
+          <CardContent className="p-8">
+            {!location ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center space-y-6"
+              >
+                <div className="w-32 h-32 mx-auto bg-muted rounded-full flex items-center justify-center">
+                  <CompassIcon className="w-16 h-16 text-muted-foreground" />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Allow location access to find the Qibla direction
+                  </p>
+                  <Button
+                    onClick={getUserLocation}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Getting Location...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Get My Location
+                      </>
+                    )}
+                  </Button>
+                  {!permissionGranted && (
+                    <Button
+                      onClick={requestOrientationPermission}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Navigation className="w-4 h-4 mr-2" /> Enable Compass
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div animate={cardControls} className="relative">
+                {/* --- Boussole --- */}
+                <div className="relative w-64 h-64 mx-auto">
+                  {/* motif décoratif (statique) */}
+                  <div className="absolute inset-0 rounded-full rotate-pattern pointer-events-none">
+                    <IslamicPattern />
+                  </div>
 
-          {orientationStatus === "granted" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2 text-muted-foreground"
-              onClick={() => {
-                setOrientationStatus("unknown");
-                setHeadingRaw(null);
-                rawBufferRef.current = [];
-              }}
-            >
-              <RotateCw size={16} />
-              Recalibrer
-            </Button>
-          )}
+                  {/* anneau décoratif (statique) */}
+                  <div className="absolute inset-0 rounded-full border-4 border-primary/30 bg-gradient-to-br from-card to-muted/50 compass-pulse" />
 
-          {/* Réglages rapides */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border">
-            <Settings2 className="w-4 h-4 text-muted-foreground" />
-            <label className="text-xs text-muted-foreground">
-              Tolérance
-              <input
-                type="range"
-                min={1}
-                max={15}
-                value={tolerance}
-                onChange={(e) => setTolerance(Number(e.target.value))}
-                className="ml-2 align-middle"
-              />
-              <span className="ml-1">{tolerance}°</span>
-            </label>
-            <span className="mx-2 text-muted-foreground/40">•</span>
-            <label className="text-xs text-muted-foreground">
-              Lissage
-              <input
-                type="range"
-                min={1}
-                max={15}
-                value={smoothWindow}
-                onChange={(e) => setSmoothWindow(Number(e.target.value))}
-                className="ml-2 align-middle"
-              />
-              <span className="ml-1">{smoothWindow}</span>
-            </label>
-          </div>
+                  {/* CADRAN qui tourne avec l’appareil : cardinales + graduations + icône Kaaba */}
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ rotate: -adjustedHeading }}
+                    transition={{
+                      type: "tween",
+                      ease: "linear",
+                      duration: 0.12,
+                    }}
+                  >
+                    {/* cardinales */}
+                    {["N", "E", "S", "W"].map((d, i) => (
+                      <div
+                        key={d}
+                        className="absolute text-sm font-bold text-primary select-none"
+                        style={{
+                          top:
+                            i === 0
+                              ? "8px"
+                              : i === 2
+                              ? "calc(100% - 24px)"
+                              : "50%",
+                          left:
+                            i === 1
+                              ? "calc(100% - 16px)"
+                              : i === 3
+                              ? "8px"
+                              : "50%",
+                          transform:
+                            i % 2 === 0
+                              ? "translateX(-50%)"
+                              : "translateY(-50%)",
+                        }}
+                      >
+                        {d}
+                      </div>
+                    ))}
 
-          {/* Debug toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowDebug((v) => !v)}
-            aria-pressed={showDebug}
-            title="Afficher les valeurs brutes"
-          >
-            <Bug className="w-4 h-4" />
-          </Button>
-        </div>
+                    {/* graduations */}
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <div
+                        key={i}
+                        className="absolute w-0.5 h-4 bg-muted-foreground/40"
+                        style={{
+                          top: "8px",
+                          left: "50%",
+                          transformOrigin: "50% 120px",
+                          transform: `translateX(-50%) rotate(${i * 30}deg)`,
+                        }}
+                      />
+                    ))}
 
-        {/* Bloc debug optionnel */}
-        {showDebug && (
-          <div className="text-xs text-muted-foreground/80 border rounded-lg px-3 py-2 max-w-[22rem]">
-            <div>lat/lon : {coords ? `${coords.lat.toFixed(5)}, ${coords.lon.toFixed(5)}` : "—"}</div>
-            <div>heading(smooth) : {headingRaw?.toFixed(1) ?? "—"}°</div>
-            <div>qiblaBearing : {qiblaBearing.toFixed(1)}°</div>
-            <div>relativeAngle : {relativeAngle.toFixed(1)}°</div>
-            <div>status : {orientationStatus}</div>
-            {error && (
-              <div className="mt-1 text-destructive flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" /> {error}
-              </div>
+                    {/* icône Kaaba à l’azimut Qibla sur le bord du cadran */}
+                    {compassData && (
+                      <div
+                        className="absolute left-1/2 top-1/2"
+                        style={{
+                          transform: `translate(-50%, -50%) rotate(${compassData.qiblaDirection}deg)`,
+                        }}
+                      >
+                        {/* rayon ≈ 112px pour 256px -> -translate-y-28 */}
+                        <div className="-translate-y-28 flex items-center justify-center">
+                          <div className="w-6 h-6 bg-accent rounded-sm flex items-center justify-center text-xs font-bold text-accent-foreground shadow">
+                            🕋
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+
+                  {/* AIGUILLE qui pointe la Kaaba (rotation = Qibla - cap ajusté) */}
+                  <motion.div
+                    animate={needleControls}
+                    className="absolute inset-0 flex items-center justify-center needle-glow"
+                  >
+                    <div className="relative">
+                      <div className="w-2 h-32 bg-gradient-to-t from-primary to-accent rounded-full shadow-lg" />
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-primary" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-accent rounded-full border-2 border-primary" />
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* état d’alignement */}
+                <div
+                  className={`mt-4 flex items-center justify-center gap-2 text-sm ${
+                    aligned ? "text-green-600" : "text-muted-foreground"
+                  }`}
+                >
+                  {aligned ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <CompassIcon className="w-4 h-4" />
+                  )}
+                  {aligned
+                    ? "Aligné vers la Qibla"
+                    : `Écart : ${Math.round(deltaDeg)}°`}
+                </div>
+
+                {/* infos */}
+                <div className="mt-4 space-y-3 text-center">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">
+                      Azimut (Qibla):
+                    </span>
+                    <span className="font-bold text-primary">
+                      {compassData?.qiblaDirection.toFixed(1)}°
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Distance:</span>
+                    <span className="font-bold text-foreground">
+                      {compassData?.distance.toFixed(0)} km
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">
+                      Votre cap (ajusté):
+                    </span>
+                    <span className="font-bold text-accent">
+                      {adjustedHeading.toFixed(1)}°
+                    </span>
+                  </div>
+                </div>
+
+                {/* réglages */}
+                <div className="mt-4 flex flex-col items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-2 px-3 py-2 rounded-xl border border-border">
+                    <Settings2 className="w-4 h-4 text-muted-foreground" />
+                    <label className="text-xs text-muted-foreground">
+                      Tolérance
+                      <input
+                        type="range"
+                        min={1}
+                        max={15}
+                        value={tolerance}
+                        onChange={(e) => setTolerance(Number(e.target.value))}
+                        className="ml-2 align-middle"
+                      />
+                      <span className="ml-1">{tolerance}°</span>
+                    </label>
+                    <span className="mx-2 text-muted-foreground/40">•</span>
+                    <label className="text-xs text-muted-foreground">
+                      Lissage
+                      <input
+                        type="range"
+                        min={1}
+                        max={60}
+                        value={smoothWindow}
+                        onChange={(e) =>
+                          setSmoothWindow(Number(e.target.value))
+                        }
+                        className="ml-2 align-middle"
+                      />
+                      <span className="ml-1">{smoothWindow}</span>
+                    </label>
+                    <span className="mx-2 text-muted-foreground/40">•</span>
+                    <label className="text-xs text-muted-foreground">
+                      Dead&nbsp;zone
+                      <input
+                        type="range"
+                        min={0}
+                        max={5}
+                        value={deadband}
+                        onChange={(e) => setDeadband(Number(e.target.value))}
+                        className="ml-2 align-middle"
+                      />
+                      <span className="ml-1">{deadband}°</span>
+                    </label>
+                  </div>
+
+                  {/* Offset & switches */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 px-3 py-2 rounded-xl border border-border">
+                    <label className="text-xs text-muted-foreground">
+                      Offset (calibration)
+                      <input
+                        type="range"
+                        min={-90}
+                        max={90}
+                        step={1}
+                        value={headingOffset}
+                        onChange={(e) =>
+                          setHeadingOffset(Number(e.target.value))
+                        }
+                        className="ml-2 align-middle w-36"
+                      />
+                      <span className="ml-1">{Math.round(headingOffset)}°</span>
+                    </label>
+                    <span className="mx-2 text-muted-foreground/40">•</span>
+                    <label className="text-xs text-muted-foreground flex items-center gap-2">
+                      Formule alternative
+                      <input
+                        type="checkbox"
+                        checked={altFormula}
+                        onChange={(e) => setAltFormula(e.target.checked)}
+                      />
+                    </label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 text-muted-foreground"
+                      onClick={() => {
+                        rawBufRef.current = [];
+                        filteredHeadingRef.current = adjustedHeading;
+                      }}
+                      title="Réinitialiser le lissage"
+                    >
+                      <RotateCw className="w-4 h-4" /> Recalibrer
+                    </Button>
+                  </div>
+
+                  <Button
+                    onClick={calibrateToQiblaNow}
+                    className="w-full sm:w-auto"
+                  >
+                    Caler sur la Qibla maintenant
+                  </Button>
+                </div>
+              </motion.div>
             )}
-          </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-center text-destructive text-sm"
+              >
+                <div className="flex items-center gap-2 justify-center">
+                  <AlertCircle className="w-4 h-4" /> {error}
+                </div>
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* instructions */}
+        {location && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="p-4 bg-muted/50 rounded-xl border">
+              <div className="text-center space-y-2">
+                <h3 className="font-semibold text-foreground">Conseils</h3>
+                <p className="text-sm text-muted-foreground">
+                  À Bonneuil-sur-Marne, l’azimut Qibla est ≈ <b>119°</b> (ESE).
+                  Pose l’appareil à plat, éloigne-le des aimants/étuis
+                  magnétiques. Si l’écart persiste, touche{" "}
+                  <i>“Caler sur la Qibla maintenant”</i> puis ajuste finement
+                  l’offset.
+                </p>
+              </div>
+            </div>
+          </motion.div>
         )}
       </div>
-    </DhikrPageLayout>
+    </div>
   );
 }

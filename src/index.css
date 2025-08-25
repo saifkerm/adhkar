@@ -1,11 +1,8 @@
 @import "tailwindcss";
 @import "./styles/mobile-utilities.css";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
-
-
-
 
 /* reset utile pour l’app mobile */
 :root {
@@ -128,4 +125,43 @@ body,
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Added custom animations for compass needle and Islamic patterns */
+@keyframes compass-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+@keyframes rotate-pattern {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes needle-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px oklch(0.646 0.222 200.116));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px oklch(0.646 0.222 200.116));
+  }
+}
+.compass-pulse {
+  animation: compass-pulse 3s ease-in-out infinite;
+}
+.rotate-pattern {
+  animation: rotate-pattern 60s linear infinite;
+}
+.needle-glow {
+  animation: needle-glow 2s ease-in-out infinite;
 }

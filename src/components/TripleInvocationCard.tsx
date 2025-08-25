@@ -58,7 +58,7 @@ export function TripleInvocationCard({ inv, sub, setSub, goals }: Props) {
 
       {open && (
         <CardContent className="space-y-3">
-          <div className="rounded-lg border p-4 text-center text-2xl font-extrabold">
+          <div className="rounded-lg border p-4 text-center text-md font-extrabold">
             {inv.transcription}
           </div>
 
