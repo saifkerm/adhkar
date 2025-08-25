@@ -2,15 +2,14 @@ import {
   INVOCATIONS,
   PRAYERS,
   PrayerTime,
-  SECTION_CONFIGURATIONS
+  SECTION_CONFIGURATIONS,
 } from "@/data/invocations";
 import { getTripleGoals } from "@/utils/tripleGoals";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { HeaderPrayers } from "@/components/HeaderPrayers";
 import { InvocationGrid } from "@/components/InvocationGrid";
 import { useInvocationState } from "@/hooks/useInvocationState";
-import { usePrayerNavigation } from "@/hooks/usePrayerNavigation";
 import { useProgress } from "@/hooks/useProgress";
 import { DhikrPageLayout } from "@/layout/DhikrPageLayout";
 import { makeKey } from "@/utils/key";
@@ -51,11 +50,7 @@ export default function ApresPriere() {
     return total ? Math.round((done / total) * 100) : 0;
   };
 
-  const {
-    active: activePrayer,
-    setActive: setActivePrayer,
-    swipeRef,
-  } = usePrayerNavigation(PRAYERS);
+  const [activePrayer, setActivePrayer] = useState<PrayerTime>(PRAYERS[0]);
 
   const currentInvocations = useMemo(() => {
     const ids = SECTION_CONFIGURATIONS[activePrayer] || [];
@@ -77,18 +72,18 @@ export default function ApresPriere() {
           onChange={(p) => setActivePrayer(p)}
           getPct={(p) => computePctForPrayer(p)}
         />
-    }>
-      <section
-        ref={swipeRef}
-        className="mx-auto mt-4 max-w-screen-md px-3 pb-8"
-      >
-        {<InvocationGrid
-        invocations={currentInvocations}
-        moment={activePrayer}
-        state={state}
-        setSingle={setSingle}
-        setTriple={setTriple}
-      />}
+      }
+    >
+      <section className="mx-auto mt-4 max-w-screen-md px-3 pb-8">
+        {
+          <InvocationGrid
+            invocations={currentInvocations}
+            moment={activePrayer}
+            state={state}
+            setSingle={setSingle}
+            setTriple={setTriple}
+          />
+        }
       </section>
     </DhikrPageLayout>
   );
