@@ -328,6 +328,7 @@ export const SECTION_CONFIGURATIONS: Record<PrayerTime, string[]> = {
   [PrayerTime.FAJR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
+    "tahlil-post-salah-once",
     "tasbih-post-salah",
     "tahlil-post-salah-once",
     "ayat-kursi",
@@ -338,6 +339,7 @@ export const SECTION_CONFIGURATIONS: Record<PrayerTime, string[]> = {
   [PrayerTime.DHUHR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
+    "tahlil-post-salah-once",
     "tasbih-post-salah",
     "tahlil-post-salah-once",
     "ayat-kursi",
@@ -346,6 +348,7 @@ export const SECTION_CONFIGURATIONS: Record<PrayerTime, string[]> = {
   [PrayerTime.ASR]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
+    "tahlil-post-salah-once",
     "tasbih-post-salah",
     "tahlil-post-salah-once",
     "ayat-kursi",
@@ -354,15 +357,16 @@ export const SECTION_CONFIGURATIONS: Record<PrayerTime, string[]> = {
   [PrayerTime.MAGHRIB]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
+    "tahlil-post-salah-once",
     "tasbih-post-salah",
     "tahlil-post-salah-once",
     "ayat-kursi",
     "three-quls",
-    "tahlil-10",
   ],
   [PrayerTime.ISHA]: [
     "istighfar-3-post-salah",
     "salam-post-salah",
+    "tahlil-post-salah-once",
     "tasbih-post-salah",
     "tahlil-post-salah-once",
     "ayat-kursi",
